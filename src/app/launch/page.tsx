@@ -1,0 +1,210 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useChainId, useSwitchChain } from 'wagmi';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Rocket, Loader2, CheckCircle, Globe, ExternalLink, ShieldCheck } from 'lucide-react';
+import { parseEther } from 'viem';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import confetti from 'canvas-confetti';
+import { toast } from 'sonner';
+import { INK_FACTORY_ABI, INK_FACTORY_ADDRESS } from '@/lib/contracts';
+import { useGlobalBalance } from '@/components/BalanceProvider';
+import Link from 'next/link';
+import { use3DTilt } from '@/hooks/use3DTilt';
+
+const INK_SEPOLIA_CHAIN_ID = 763373;
+
+// Right col preview with 3D tilt
+function PreviewCard({ name, symbol, supply }: { name: string; symbol: string; supply: string }) {
+  const { ref, onMouseMove, onMouseEnter, onMouseLeave } = use3DTilt({ max: 14, scale: 1.03 });
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: 0.1 }}
+      onMouseMove={onMouseMove}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      className="xl:col-span-2 rounded-3xl bg-neutral-900 border border-cyan-500/10 p-6 sm:p-8 flex flex-col items-center justify-center relative overflow-hidden group transform-gpu"
+    >
+       {/* Decorative background grid inside preview */}
+       <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px'}} />
+       
+       <p className="text-[10px] font-bold text-cyan-500/80 uppercase tracking-widest mb-8 absolute top-8 border border-cyan-500/20 px-3 py-1 rounded-full"><span className="animate-pulse w-1.5 h-1.5 bg-cyan-400 inline-block rounded-full mr-2"/>UI PREVIEW</p>
+       
+       <div className="w-full max-w-[280px] bg-black border border-white/10 rounded-3xl p-6 shadow-2xl relative z-10 hover:border-cyan-500/30 hover:shadow-[0_20px_40px_rgba(6,182,212,0.15)] transition-all duration-500">
+         <div className="flex items-center justify-between mb-8">
+           <div className="text-white/40 text-[10px] font-bold">MetaMask View</div>
+           <ShieldCheck className="w-4 h-4 text-emerald-500" />
+         </div>
+         
+         <div className="flex flex-col items-center mb-6">
+           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 to-cyan-500 mb-4 flex items-center justify-center shadow-inner shadow-black/80 text-white font-black text-xl border border-white/20">
+             {symbol.slice(0,2) || '??'}
+           </div>
+           <h3 className="text-2xl font-bold tracking-tight text-white">{name || 'Your Token'}</h3>
+           <p className="text-white/40 text-sm font-mono mt-1">Asset ID</p>
+         </div>
+
+         <div className="rounded-xl bg-white/5 p-4 border border-white/5">
+            <div className="flex justify-between items-center mb-2">
+               <span className="text-xs text-white/50 font-bold">Balance</span>
+               <span className="text-xs text-white/50 font-bold font-mono">Ink Sepolia</span>
+            </div>
+            <div className="text-xl font-medium text-white">{Number(supply || 0).toLocaleString()} <span className="text-cyan-400 text-sm font-bold uppercase">{symbol || 'TKN'}</span></div>
+         </div>
+       </div>
+    </motion.div>
+  );
+}
+
+export default function LaunchPage() {
+  const [mounted, setMounted] = useState(false);
+  const [name, setName] = useState('');
+  const [symbol, setSymbol] = useState('');
+  const [supply, setSupply] = useState('1000000');
+  const [deployedHash, setDeployedHash] = useState<string | null>(null);
+
+  const { isConnected } = useAccount();
+  const chainId = useChainId();
+  const { switchChainAsync, isPending: isSwitching } = useSwitchChain();
+  const { refetchBalance } = useGlobalBalance();
+
+  const { data: hash, isPending: isWalletLoading, writeContractAsync } = useWriteContract();
+  const { isLoading: isMining, isSuccess } = useWaitForTransactionReceipt({ hash });
+
+  useEffect(() => { setMounted(true); }, []);
+
+  useEffect(() => {
+    if (isSuccess && hash) {
+      setTimeout(() => refetchBalance(), 1500);
+      setDeployedHash(hash);
+      const end = Date.now() + 2000;
+      const colors = ['#A855F7', '#06B6D4', '#ffffff'];
+      const fire = () => {
+        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors });
+        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors });
+        if (Date.now() < end) requestAnimationFrame(fire);
+      };
+      requestAnimationFrame(fire);
+    }
+  }, [isSuccess, hash, refetchBalance]);
+
+  const isWrongChain = isConnected && chainId !== INK_SEPOLIA_CHAIN_ID;
+  const isWorking = isWalletLoading || isMining;
+
+  const handleDeploy = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !symbol || !supply) return;
+    if (isWrongChain) {
+      try { await switchChainAsync({ chainId: INK_SEPOLIA_CHAIN_ID }); } 
+      catch { return toast.error('Please switch to Ink Sepolia.'); }
+    }
+    try {
+      await writeContractAsync({
+        address: INK_FACTORY_ADDRESS,
+        abi: INK_FACTORY_ABI,
+        functionName: 'createToken',
+        args: [name, symbol, parseEther(supply)],
+        chainId: INK_SEPOLIA_CHAIN_ID,
+      });
+    } catch (e: any) {
+      toast.error('Transaction Failed', { description: e.shortMessage || 'Rejected or reverted' });
+    }
+  };
+
+  if (!mounted) return null;
+
+  return (
+    <div className="min-h-screen pt-28 pb-16 px-4 sm:px-6">
+      <main className="max-w-[1600px] mx-auto">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10 text-center sm:text-left">
+          <h1 className="text-4xl md:text-5xl font-medium tracking-tighter text-white mb-2">Token Compiler</h1>
+          <p className="text-white/50 tracking-tight">Configure parameters to generate your ERC-20 payload on Ink Sepolia.</p>
+        </motion.div>
+
+        {!isConnected ? (
+          <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="rounded-3xl border border-white/5 bg-neutral-900/50 p-16 text-center shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+            <Rocket className="w-12 h-12 text-purple-500 mx-auto mb-6" />
+            <h2 className="text-2xl font-medium text-white mb-2 tracking-tight">Verification Needed</h2>
+            <p className="text-white/50 mb-8 max-w-sm mx-auto">Link a secure enclave to initialize the compiler sequence.</p>
+            <div className="flex justify-center"><ConnectButton /></div>
+          </motion.div>
+        ) : isWrongChain ? (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-3xl border border-red-500/20 bg-red-950/20 p-16 text-center">
+            <Globe className="w-12 h-12 text-red-500 mx-auto mb-6 animate-pulse" />
+            <h2 className="text-2xl font-medium text-white mb-2">Network Desync</h2>
+            <p className="text-white/50 mb-8">Move context to Ink Sepolia to continue.</p>
+            <button onClick={() => switchChainAsync({ chainId: INK_SEPOLIA_CHAIN_ID })} disabled={isSwitching} className="px-8 py-3 rounded-full bg-red-600 hover:bg-red-500 text-white font-bold transition-colors">
+              {isSwitching ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Force Sync'}
+            </button>
+          </motion.div>
+        ) : deployedHash ? (
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="rounded-3xl border border-cyan-500/20 bg-neutral-900 p-12 text-center max-w-2xl mx-auto shadow-[0_0_50px_rgba(6,182,212,0.15)] flex flex-col items-center">
+             <div className="w-20 h-20 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center mb-6">
+                <CheckCircle className="w-10 h-10 text-cyan-400" />
+             </div>
+             <h2 className="text-3xl font-medium text-white tracking-tight mb-2">Block Mined Successfully</h2>
+             <p className="text-white/50 mb-8">Asset {name} (${symbol}) is permanently active on the Ink Network.</p>
+             
+             <div className="flex flex-col sm:flex-row gap-4 w-full">
+               <button onClick={() => { setDeployedHash(null); setName(''); setSymbol(''); }} className="flex-1 py-4 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold tracking-tight border border-white/10 transition-colors">
+                 Build New
+               </button>
+               <a href={`https://explorer-sepolia.inkonchain.com/tx/${deployedHash}`} target="_blank" className="flex-1 py-4 rounded-xl bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-400 font-bold tracking-tight border border-cyan-500/30 transition-colors flex items-center justify-center gap-2">
+                 Block Explorer <ExternalLink className="w-4 h-4" />
+               </a>
+             </div>
+          </motion.div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-5 gap-6">
+            
+            {/* Left Col: Config Form */}
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="xl:col-span-3 rounded-3xl bg-neutral-900 border border-white/5 shadow-2xl p-6 sm:p-8 transform-gpu">
+               <div className="flex items-center gap-3 mb-8">
+                  <div className="w-8 h-8 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center"><Rocket className="w-4 h-4 text-purple-400" /></div>
+                  <h2 className="text-xl font-medium text-white">Asset Parameters</h2>
+               </div>
+
+               <form onSubmit={handleDeploy} className="space-y-6">
+                 <div>
+                   <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest block mb-2">Full Asset Name</label>
+                   <input type="text" value={name} onChange={e => setName(e.target.value)} required minLength={2} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all" placeholder="e.g. Ink Protocol" />
+                 </div>
+                 <div className="grid grid-cols-2 gap-4">
+                   <div>
+                     <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest block mb-2">Ticker Symbol</label>
+                     <input type="text" value={symbol} onChange={e => setSymbol(e.target.value.toUpperCase())} required minLength={2} maxLength={6} style={{ textTransform: 'uppercase'}} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all font-mono" placeholder="INK" />
+                   </div>
+                   <div>
+                     <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest block mb-2">Initial Supply</label>
+                     <input type="number" value={supply} onChange={e => setSupply(e.target.value)} required min="1" className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-white/30 transition-all font-mono" />
+                   </div>
+                 </div>
+
+                 <AnimatePresence mode="wait">
+                    {isWorking ? (
+                      <motion.div key="loading" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="rounded-xl border border-purple-500/30 bg-purple-500/10 p-4 text-purple-400 flex items-center justify-center gap-3 overflow-hidden">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span className="font-bold text-sm tracking-tight">{isWalletLoading ? 'Awaiting Wallet Signature...' : 'Executing on Ink...'}</span>
+                      </motion.div>
+                    ) : (
+                      <motion.button key="submit" initial={{ opacity: 0 }} animate={{ opacity: 1 }} type="submit" className="w-full rounded-xl bg-white text-black hover:bg-purple-500 hover:text-white hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] py-4 font-bold text-sm uppercase tracking-widest transition-all duration-300">
+                         Compile & Deploy
+                      </motion.button>
+                    )}
+                 </AnimatePresence>
+               </form>
+            </motion.div>
+
+            {/* Right Col: Live Preview */}
+            <PreviewCard name={name} symbol={symbol} supply={supply} />
+
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
