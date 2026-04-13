@@ -34,3 +34,5 @@ Thumbs.db
 node_modules
 tsconfig.tsbuildinfo
 
+.next/
+node_modules/
