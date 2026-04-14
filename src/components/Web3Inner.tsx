@@ -115,25 +115,15 @@ function SessionManager() {
         console.error('[SessionManager] Fatal WalletConnect error caught. Purging session silently...');
         e.preventDefault();
 
-        // НЕ перезагружать если юзер не был подключён — иначе бесконечный reload на десктопе без кошелька
-        const hasWCSession = Object.keys(localStorage).some(k => k.startsWith('wc@2'));
-        if (!hasWCSession) return;
-
-        // Muffle the auto-refresh visual errors:
-        toast.dismiss(); // Clear any existing sonner toasts immediately
-        
-        // Disconnect immediately 
+        toast.dismiss();
         disconnect();
-        
-        // Deep cleanse of local keys before hard reload to avoid reload loops
+
         for (let i = localStorage.length - 1; i >= 0; i--) {
           const key = localStorage.key(i);
           if (key && (key.startsWith('wc@2') || key.includes('wagmi.store'))) {
             localStorage.removeItem(key);
           }
         }
-        
-        setTimeout(() => window.location.reload(), 300);
       }
     };
     

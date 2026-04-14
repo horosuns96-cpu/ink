@@ -233,6 +233,8 @@ export default function DashboardPage() {
       setMyTokenAddresses(cacheRef.current.tokens);
       return;
     }
+    let cancelled = false;
+
     setIsLoadingOwned(true);
     publicClient.getLogs({
       address: INK_FACTORY_ADDRESS,
@@ -240,14 +242,22 @@ export default function DashboardPage() {
       fromBlock: BigInt(46850539),
     })
     .then(logs => {
+      if (cancelled) return;
       const mine = logs
         .filter(l => l.args.owner?.toLowerCase() === address.toLowerCase())
         .map(l => l.args.tokenAddress as string);
       cacheRef.current = { address, tokens: mine };
       setMyTokenAddresses(mine);
     })
-    .catch(console.error)
-    .finally(() => setIsLoadingOwned(false));
+    .catch(err => {
+      if (cancelled) return;
+      console.error(err);
+    })
+    .finally(() => {
+      if (!cancelled) setIsLoadingOwned(false);
+    });
+
+    return () => { cancelled = true; };
   }, [address, publicClient]);
 
   if (isReconnecting) return null;
