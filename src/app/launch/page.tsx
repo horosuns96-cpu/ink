@@ -164,7 +164,7 @@ export default function LaunchPage() {
                <form onSubmit={handleDeploy} className="space-y-6">
                  <div>
                    <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest block mb-2">Full Asset Name</label>
-                   <input type="text" value={name} onChange={e => setName(e.target.value)} required minLength={2} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all" placeholder="e.g. Ink Protocol" />
+                   <input type="text" value={name} onChange={e => setName(e.target.value)} required minLength={2} maxLength={50} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all" placeholder="e.g. Ink Protocol" />
                  </div>
                  <div className="grid grid-cols-2 gap-4">
                    <div>
@@ -173,7 +173,7 @@ export default function LaunchPage() {
                    </div>
                    <div>
                      <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest block mb-2">Initial Supply</label>
-                     <input type="number" value={supply} onChange={e => setSupply(e.target.value)} required min="1" className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-white/30 transition-all font-mono" />
+                     <input type="number" value={supply} onChange={e => setSupply(e.target.value)} required min="1" max="1000000000000" onKeyDown={e => ['e','E','+','-','.'].includes(e.key) && e.preventDefault()} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-white/30 transition-all font-mono" />
                    </div>
                  </div>
 

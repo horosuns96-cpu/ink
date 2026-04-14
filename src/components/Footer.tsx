@@ -4,7 +4,7 @@ import { ExternalLink } from 'lucide-react';
 const INK_LINKS = [
   { label: 'Ink Website', href: 'https://inkonchain.com' },
   { label: 'Explorer', href: 'https://explorer-sepolia.inkonchain.com' },
-  { label: 'Faucet', href: 'https://faucet.inkonchain.com' },
+  { label: 'Faucet', href: 'https://inkonchain.com/faucet' },
   { label: 'Docs', href: 'https://docs.inkonchain.com' },
   { label: 'Twitter / X', href: 'https://x.com/inkonchain' },
 ];
