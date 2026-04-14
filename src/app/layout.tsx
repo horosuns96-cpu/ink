@@ -10,7 +10,6 @@ import { Footer } from '@/components/Footer';
 const Toaster = dynamic(() => import('sonner').then((mod) => mod.Toaster), { ssr: false });
 const BackgroundBlobs = dynamic(() => import('@/components/BackgroundBlobs').then((mod) => mod.BackgroundBlobs), { ssr: false });
 const StarField = dynamic(() => import('@/components/StarField').then((mod) => mod.StarField), { ssr: false });
-const CursorTrail = dynamic(() => import('@/components/CursorTrail').then((mod) => mod.CursorTrail), { ssr: false });
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -52,7 +51,6 @@ export default function RootLayout({
       <body className="bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-900 via-black to-black text-white antialiased min-h-screen selection:bg-purple-500/30 selection:text-white">
         <BackgroundBlobs />
         <StarField />
-        <CursorTrail />
         <ErrorBoundary>
           <Web3Provider>
             <Header />

@@ -13,7 +13,7 @@ interface Star {
   flickerSpeed: number;
 }
 
-const STAR_COUNT = 80;
+const STAR_COUNT = 50;
 
 function createStars(w: number, h: number): Star[] {
   return Array.from({ length: STAR_COUNT }, () => ({

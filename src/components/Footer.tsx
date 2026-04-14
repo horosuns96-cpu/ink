@@ -17,7 +17,7 @@ const APP_LINKS = [
 
 export function Footer() {
   return (
-    <footer className="relative z-10 border-t border-white/5 mt-24 py-12 px-4 sm:px-6">
+    <footer className="relative z-10 border-t border-white/5 mt-8 py-12 px-4 sm:px-6">
       <div className="max-w-[1600px] mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 mb-10">
 
