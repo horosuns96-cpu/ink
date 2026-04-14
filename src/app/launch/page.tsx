@@ -173,7 +173,7 @@ export default function LaunchPage() {
                    </div>
                    <div>
                      <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest block mb-2">Initial Supply</label>
-                     <input type="number" value={supply} onChange={e => setSupply(e.target.value)} required min="1" max="1000000000000" onKeyDown={e => ['e','E','+','-','.'].includes(e.key) && e.preventDefault()} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-white/30 transition-all font-mono" />
+                     <input type="number" value={supply} onChange={e => { const v = e.target.value.replace(/[^0-9]/g, ''); const n = Number(v); setSupply(n > 1_000_000_000_000 ? '1000000000000' : v); }} required min="1" max="1000000000000" onKeyDown={e => ['e','E','+','-','.'].includes(e.key) && e.preventDefault()} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-white/30 transition-all font-mono" />
                    </div>
                  </div>
 
