@@ -10,7 +10,7 @@ interface TiltOptions {
 }
 
 interface TiltResult {
-  ref: React.RefObject<HTMLDivElement | null>;
+  ref: React.RefObject<HTMLDivElement>;
   onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void;
   onMouseEnter: (e: React.MouseEvent<HTMLDivElement>) => void;
   onMouseLeave: () => void;
@@ -31,6 +31,7 @@ export function use3DTilt(options: TiltOptions = {}): TiltResult {
     if (isTouch || !ref.current) return;
     boundsRef.current = ref.current.getBoundingClientRect();
     ref.current.style.transition = `transform ${speed}ms cubic-bezier(0.03, 0.98, 0.52, 0.99)`;
+    ref.current.style.willChange = 'transform';
   }, [speed]);
 
   const onMouseMove = useCallback(
@@ -50,7 +51,6 @@ export function use3DTilt(options: TiltOptions = {}): TiltResult {
 
       el.style.transition = 'transform 50ms linear';
       el.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(${scale},${scale},${scale})`;
-      el.style.willChange = 'transform';
     },
     [max, scale]
   );

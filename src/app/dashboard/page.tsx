@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { useAccount, useReadContract, useWatchAsset, useSwitchChain, useChainId } from 'wagmi';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useAccount, useReadContract, useReadContracts, useWatchAsset, useSwitchChain, useChainId, usePublicClient } from 'wagmi';
+import { parseAbiItem } from 'viem';
 import { INK_FACTORY_ABI, INK_FACTORY_ADDRESS } from '@/lib/contracts';
 import { formatEther } from 'viem';
 import { useGlobalBalance } from '@/components/BalanceProvider';
@@ -10,7 +11,6 @@ import { Rocket, ExternalLink, Copy, CheckCircle, Coins, LayoutDashboard, Plus, 
 import Link from 'next/link';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { toast } from 'sonner';
-import { use3DTilt } from '@/hooks/use3DTilt';
 
 const INK_SEPOLIA_CHAIN_ID = 763373;
 
@@ -23,14 +23,18 @@ const ERC20_BALANCE_OF_ABI = [
 
 type SortMode = 'newest' | 'oldest';
 
-const TokenCard = React.memo(function TokenCard({ tokenAddress, userAddress, index }: { tokenAddress: string; userAddress: string; index: number }) {
-  const [copied, setCopied] = useState(false);
+interface TokenData {
+  name?: string;
+  symbol?: string;
+  totalSupply?: bigint;
+  balance?: bigint;
+}
 
-  const { data: name } = useReadContract({ address: tokenAddress as `0x${string}`, abi: ERC20_BALANCE_OF_ABI, functionName: 'name', query: { staleTime: 60_000, gcTime: 300_000 } });
-  const { data: symbol } = useReadContract({ address: tokenAddress as `0x${string}`, abi: ERC20_BALANCE_OF_ABI, functionName: 'symbol', query: { staleTime: 60_000, gcTime: 300_000 } });
-  const { data: totalSupply } = useReadContract({ address: tokenAddress as `0x${string}`, abi: ERC20_BALANCE_OF_ABI, functionName: 'totalSupply', query: { staleTime: 60_000, gcTime: 300_000 } });
-  const { data: balance } = useReadContract({ address: tokenAddress as `0x${string}`, abi: ERC20_BALANCE_OF_ABI, functionName: 'balanceOf', args: [userAddress as `0x${string}`], query: { staleTime: 30_000, gcTime: 120_000 } });
-  const { watchAsset, isSupported } = useWatchAsset();
+const TokenCard = React.memo(function TokenCard({ tokenAddress, tokenData, index }: { tokenAddress: string; tokenData: TokenData; index: number }) {
+  const [copied, setCopied] = useState(false);
+  const { watchAsset } = useWatchAsset();
+
+  const { name, symbol, totalSupply, balance } = tokenData;
 
   const isOwner = balance && totalSupply && balance === totalSupply;
 
@@ -54,18 +58,12 @@ const TokenCard = React.memo(function TokenCard({ tokenAddress, userAddress, ind
     } catch {}
   };
 
-  const { ref: tiltRef, onMouseMove, onMouseEnter, onMouseLeave } = use3DTilt({ max: 10, scale: 1.02 });
-
   return (
     <motion.div
-      ref={tiltRef}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index * 0.04, 0.4), duration: 0.3 }}
-      onMouseMove={onMouseMove}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      className="p-6 space-y-4 rounded-3xl bg-neutral-900 border border-purple-500/10 hover:border-purple-500/30 transition-colors duration-200 hover:shadow-[0_0_30px_rgba(168,85,247,0.12)] flex flex-col justify-between transform-gpu"
+      className="p-6 space-y-4 rounded-3xl bg-neutral-900 border border-purple-500/10 hover:border-purple-500/30 transition-colors duration-200 hover:shadow-[0_0_30px_rgba(168,85,247,0.12)] flex flex-col justify-between"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -109,7 +107,6 @@ const TokenCard = React.memo(function TokenCard({ tokenAddress, userAddress, ind
           {copied ? <CheckCircle className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
         </button>
         <button
-          disabled={!isSupported}
           onClick={async () => {
             if (!symbol) return;
             try {
@@ -117,7 +114,7 @@ const TokenCard = React.memo(function TokenCard({ tokenAddress, userAddress, ind
               toast.success(`$${String(symbol)} added to wallet!`);
             } catch {}
           }}
-          className={`flex-1 flex justify-center items-center gap-2 px-3 py-2.5 rounded-xl border transition-colors active:scale-95 ${isSupported ? 'bg-purple-500/10 hover:bg-purple-500/20 border-purple-500/20 text-purple-400' : 'bg-gray-500/10 border-gray-500/20 text-gray-500 opacity-50 cursor-not-allowed'}`}
+          className="flex-1 flex justify-center items-center gap-2 px-3 py-2.5 rounded-xl border transition-colors active:scale-95 bg-purple-500/10 hover:bg-purple-500/20 border-purple-500/20 text-purple-400"
         >
           <Wallet className="w-4 h-4" />
         </button>
@@ -135,29 +132,22 @@ const TokenCard = React.memo(function TokenCard({ tokenAddress, userAddress, ind
 });
 
 
-// Stat card with 3D tilt
-function TiltStatCard({ stat }: { stat: { label: string; value: string; icon: React.ReactNode; action?: () => void } }) {
-  const { ref, onMouseMove, onMouseEnter, onMouseLeave } = use3DTilt({ max: 8, scale: 1.02 });
+function TiltStatCard({ stat }: { stat: { label: string; value: string; sub?: string; icon: React.ReactNode; action?: () => void } }) {
   return (
     <div
-      ref={ref}
       onClick={stat.action}
-      onMouseMove={onMouseMove}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      className={`p-6 rounded-3xl bg-neutral-900 border border-white/5 transform-gpu transition-colors ${stat.action ? 'cursor-pointer hover:border-red-500/30 hover:bg-neutral-800' : ''}`}
+      className={`p-6 rounded-3xl bg-neutral-900 border border-white/5 transition-colors ${stat.action ? 'cursor-pointer hover:border-red-500/30 hover:bg-neutral-800' : ''}`}
     >
       <div className="flex items-center gap-2 mb-3">{stat.icon}<span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{stat.label}</span></div>
       <div className="text-2xl font-medium tracking-tight text-white">{stat.value}</div>
+      {stat.sub && <div className="text-[10px] text-white/30 mt-1">{stat.sub}</div>}
     </div>
   );
 }
 
 export default function DashboardPage() {
-  const [mounted, setMounted] = useState(false);
   const [search, setSearch] = useState('');
   const [sortMode, setSortMode] = useState<SortMode>('newest');
-
 
   const { address, isConnected, isReconnecting, status } = useAccount();
   const chainId = useChainId();
@@ -171,19 +161,68 @@ export default function DashboardPage() {
     query: { staleTime: 30_000 }
   });
 
-  useEffect(() => { setMounted(true); }, []);
-
   const tokenList = useMemo(() => {
     const raw = (allTokens as string[] | undefined) || [];
-    // Sort
     const sorted = sortMode === 'newest' ? [...raw].reverse() : [...raw];
-    // Filter by address substring
     if (!search.trim()) return sorted;
     const q = search.trim().toLowerCase();
     return sorted.filter(addr => addr.toLowerCase().includes(q));
   }, [allTokens, sortMode, search]);
 
-  if (!mounted || isReconnecting || status === 'reconnecting') return null;
+  const batchContracts = useMemo(() =>
+    tokenList.flatMap(addr => [
+      { address: addr as `0x${string}`, abi: ERC20_BALANCE_OF_ABI, functionName: 'name' as const },
+      { address: addr as `0x${string}`, abi: ERC20_BALANCE_OF_ABI, functionName: 'symbol' as const },
+      { address: addr as `0x${string}`, abi: ERC20_BALANCE_OF_ABI, functionName: 'totalSupply' as const },
+      { address: addr as `0x${string}`, abi: ERC20_BALANCE_OF_ABI, functionName: 'balanceOf' as const, args: [address as `0x${string}`] },
+    ]),
+    [tokenList, address]
+  );
+
+  const { data: batchData } = useReadContracts({
+    contracts: batchContracts,
+    multicallAddress: '0xcA11bde05977b3631167028862bE2a173976CA11',
+    query: { staleTime: 60_000, gcTime: 300_000, enabled: tokenList.length > 0 && !!address },
+  });
+
+  const tokenDataMap = useMemo((): Record<string, TokenData> => {
+    if (!batchData) return {};
+    return Object.fromEntries(
+      tokenList.map((addr, i) => [
+        addr,
+        {
+          name: batchData[i * 4]?.result as string | undefined,
+          symbol: batchData[i * 4 + 1]?.result as string | undefined,
+          totalSupply: batchData[i * 4 + 2]?.result as bigint | undefined,
+          balance: batchData[i * 4 + 3]?.result as bigint | undefined,
+        },
+      ])
+    );
+  }, [batchData, tokenList]);
+
+  const publicClient = usePublicClient();
+  const [myTokenAddresses, setMyTokenAddresses] = useState<string[]>([]);
+  const [isLoadingOwned, setIsLoadingOwned] = useState(false);
+
+  useEffect(() => {
+    if (!address || !publicClient) return;
+    setIsLoadingOwned(true);
+    publicClient.getLogs({
+      address: INK_FACTORY_ADDRESS,
+      event: parseAbiItem('event TokenCreated(address indexed tokenAddress, string name, string symbol, uint256 initialSupply, address owner)'),
+      fromBlock: BigInt(46850539),
+    })
+    .then(logs => {
+      const mine = logs
+        .filter(l => l.args.owner?.toLowerCase() === address.toLowerCase())
+        .map(l => l.args.tokenAddress as string);
+      setMyTokenAddresses(mine);
+    })
+    .catch(console.error)
+    .finally(() => setIsLoadingOwned(false));
+  }, [address, publicClient]);
+
+  if (isReconnecting) return null;
 
   const totalCount = ((allTokens as string[] | undefined) || []).length;
 
@@ -218,7 +257,7 @@ export default function DashboardPage() {
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
                 { label: 'Network Power', value: `${balanceFormatted} ETH`, icon: <Coins className="w-4 h-4 text-cyan-400" /> },
-                { label: 'Deployed Contracts', value: `${totalCount} Assets`, icon: <Package className="w-4 h-4 text-purple-400" /> },
+                { label: 'Deployed Contracts', value: `${totalCount} Total`, sub: isLoadingOwned ? 'Scanning events...' : myTokenAddresses.length > 0 ? `${myTokenAddresses.length} deployed by you` : 'None deployed yet', icon: <Package className="w-4 h-4 text-purple-400" /> },
                 {
                   label: 'RPC Link',
                   value: chainId === INK_SEPOLIA_CHAIN_ID ? 'Connected (Ink)' : 'Wrong Network',
@@ -295,7 +334,7 @@ export default function DashboardPage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
                   {tokenList.map((tokenAddr, i) => (
-                    <TokenCard key={tokenAddr} tokenAddress={tokenAddr} userAddress={address!} index={i} />
+                    <TokenCard key={tokenAddr} tokenAddress={tokenAddr} tokenData={tokenDataMap[tokenAddr] ?? {}} index={i} />
                   ))}
                 </div>
               )}

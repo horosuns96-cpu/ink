@@ -5,11 +5,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Copy, CheckCircle, LogOut, ExternalLink, Activity } from 'lucide-react';
-import { useAccount, useDisconnect, useChainId } from 'wagmi';
+import { useAccount, useDisconnect } from 'wagmi';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const INK_SEPOLIA_CHAIN_ID = 763373;
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -20,8 +18,6 @@ const navLinks = [
 function truncateAddress(address: string) {
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
-
-// ─── Dropdown Profile ──────────────────────────────────────────
 
 function ProfileDropdown({ address, onClose }: { address: string; onClose: () => void }) {
   const { disconnect } = useDisconnect();
@@ -88,13 +84,10 @@ function ProfileDropdown({ address, onClose }: { address: string; onClose: () =>
 }
 
 export function Header() {
-  const [mounted, setMounted] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const pathname = usePathname();
   const { address, isConnected, status } = useAccount();
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (!isProfileOpen) return;
@@ -109,27 +102,26 @@ export function Header() {
     setIsProfileOpen(false);
   }, [pathname]);
 
-  const hasPersistedState = typeof window !== 'undefined' 
-    ? (localStorage.getItem('wagmi.store') || '').includes('"status":"connected"') || !!localStorage.getItem('wagmi.connected')
-    : false;
-  const isHydratingConnection = mounted && status === 'disconnected' && hasPersistedState;
-  const isLoadingSession = !mounted || status === 'connecting' || status === 'reconnecting' || isHydratingConnection;
+  // Показываем spinner только когда точно reconnecting (восстановление сессии при загрузке)
+  // НЕ показываем при connecting — это вызывало моргание при переходах
+  const isReconnecting = status === 'reconnecting';
 
   return (
     <header className="fixed top-4 sm:top-6 left-0 right-0 z-50 px-3 sm:px-6 max-w-[1600px] mx-auto">
       <div className="flex items-center justify-between gap-2">
 
-        {/* Left spacer - only desktop */}
+        {/* Left spacer */}
         <div className="hidden sm:block sm:flex-1" />
 
-        {/* Center: Segmented Control */}
-        <div className="pointer-events-auto bg-black/60 backdrop-blur-md border border-white/10 p-1 flex items-center rounded-full shadow-[0_4px_30px_rgba(168,85,247,0.1)] shrink-0">
+        {/* Center: Nav */}
+        <div className="pointer-events-auto bg-black/80 border border-white/10 p-1 flex items-center rounded-full shadow-[0_4px_30px_rgba(168,85,247,0.1)] shrink-0">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
               <Link
                 key={link.href}
                 href={link.href}
+                prefetch={true}
                 className={`relative px-4 sm:px-6 py-2 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest transition-colors z-10 min-w-[52px] text-center ${
                   isActive ? 'text-white' : 'text-gray-400 hover:text-white'
                 }`}
@@ -148,29 +140,31 @@ export function Header() {
         </div>
 
         {/* Right: Auth */}
-        <div className="pointer-events-auto relative sm:flex-1 flex justify-end shrink-0" ref={dropdownRef}>
-          {isLoadingSession ? (
-            <div className="w-9 h-9 rounded-full bg-white/5 animate-pulse" />
-          ) : isConnected && address ? (
-            <div>
+        <div className="pointer-events-auto relative sm:flex-1 flex justify-end" ref={dropdownRef}>
+          <div className="shrink-0 relative flex items-center justify-end min-w-[44px] min-h-[44px]">
+            {isReconnecting ? (
+              // Только при восстановлении сессии показываем placeholder
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/5 animate-pulse" />
+            ) : isConnected && address ? (
               <button
                 onClick={() => setIsProfileOpen(prev => !prev)}
                 className="w-9 h-9 sm:w-11 sm:h-11 rounded-full border border-purple-500/30 bg-purple-900/30 text-cyan-400 font-mono text-[10px] font-black flex items-center justify-center hover:bg-purple-900/50 hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all"
               >
                 {address.slice(2, 4).toUpperCase()}
               </button>
-              <AnimatePresence>
-                {isProfileOpen && <ProfileDropdown address={address} onClose={() => setIsProfileOpen(false)} />}
-              </AnimatePresence>
-            </div>
-          ) : (
-            <ConnectButton
-              accountStatus="avatar"
-              showBalance={false}
-              chainStatus="none"
-              label="Connect"
-            />
-          )}
+            ) : (
+              // Всегда показываем ConnectButton когда не подключён — без моргания
+              <ConnectButton
+                accountStatus="avatar"
+                showBalance={false}
+                chainStatus="none"
+                label="Connect"
+              />
+            )}
+          </div>
+          <AnimatePresence>
+            {isProfileOpen && address && <ProfileDropdown address={address} onClose={() => setIsProfileOpen(false)} />}
+          </AnimatePresence>
         </div>
       </div>
     </header>

@@ -61,7 +61,6 @@ function PreviewCard({ name, symbol, supply }: { name: string; symbol: string; s
 }
 
 export default function LaunchPage() {
-  const [mounted, setMounted] = useState(false);
   const [name, setName] = useState('');
   const [symbol, setSymbol] = useState('');
   const [supply, setSupply] = useState('1000000');
@@ -74,8 +73,6 @@ export default function LaunchPage() {
 
   const { data: hash, isPending: isWalletLoading, writeContractAsync } = useWriteContract();
   const { isLoading: isMining, isSuccess } = useWaitForTransactionReceipt({ hash });
-
-  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     if (isSuccess && hash) {
@@ -115,22 +112,19 @@ export default function LaunchPage() {
     }
   };
 
-  if (!mounted) return null;
-
   return (
-    <div className="min-h-screen pt-28 pb-16 px-4 sm:px-6">
+    <div className="relative pt-24 pb-16 px-4 sm:px-6">
       <main className="max-w-[1600px] mx-auto">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10 text-center sm:text-left">
-          <h1 className="text-4xl md:text-5xl font-medium tracking-tighter text-white mb-2">Token Compiler</h1>
-          <p className="text-white/50 tracking-tight">Configure parameters to generate your ERC-20 payload on Ink Sepolia.</p>
-        </motion.div>
-
         {!isConnected ? (
-          <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="rounded-3xl border border-white/5 bg-neutral-900/50 p-16 text-center shadow-[0_0_30px_rgba(0,0,0,0.5)]">
-            <Rocket className="w-12 h-12 text-purple-500 mx-auto mb-6" />
-            <h2 className="text-2xl font-medium text-white mb-2 tracking-tight">Verification Needed</h2>
-            <p className="text-white/50 mb-8 max-w-sm mx-auto">Link a secure enclave to initialize the compiler sequence.</p>
-            <div className="flex justify-center"><ConnectButton /></div>
+          <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md mx-auto rounded-[2rem] bg-neutral-900 border border-purple-500/20 p-12 text-center space-y-6 mt-20 shadow-[0_0_50px_rgba(168,85,247,0.1)]">
+            <div className="w-20 h-20 mx-auto rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
+              <Rocket className="w-10 h-10 text-purple-400" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-medium tracking-tight mb-2 text-white">Verification Needed</h2>
+              <p className="text-sm text-white/50 mb-8 max-w-xs mx-auto">Link a secure enclave to initialize the compiler sequence.</p>
+              <div className="flex justify-center"><ConnectButton /></div>
+            </div>
           </motion.div>
         ) : isWrongChain ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-3xl border border-red-500/20 bg-red-950/20 p-16 text-center">
@@ -159,6 +153,11 @@ export default function LaunchPage() {
              </div>
           </motion.div>
         ) : (
+          <>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10 text-center sm:text-left">
+            <h1 className="text-4xl md:text-5xl font-medium tracking-tighter text-white mb-2">Token Compiler</h1>
+            <p className="text-white/50 tracking-tight">Configure parameters to generate your ERC-20 payload on Ink Sepolia.</p>
+          </motion.div>
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-5 gap-6">
             
             {/* Left Col: Config Form */}
@@ -203,6 +202,7 @@ export default function LaunchPage() {
             <PreviewCard name={name} symbol={symbol} supply={supply} />
 
           </div>
+          </>
         )}
       </main>
     </div>

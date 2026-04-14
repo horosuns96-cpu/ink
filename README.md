@@ -1,66 +1,175 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/sparkles.svg" alt="InkLaunch Logo" width="120" height="120">
-  <h1>InkLaunch</h1>
-  <p><strong>The fastest way to deploy ERC-20 tokens on Ink Sepolia. No code required.</strong></p>
-  <p>
-    <img src="https://img.shields.io/badge/Network-Ink%20Sepolia-blue?style=flat-square" alt="Network">
-    <img src="https://img.shields.io/badge/Framework-Next.js-black?style=flat-square" alt="Next.js">
-    <img src="https://img.shields.io/badge/Styling-TailwindCSS-06b6d4?style=flat-square" alt="Tailwind">
-    <img src="https://img.shields.io/badge/Web3-Wagmi%20%2B%20RainbowKit-purple?style=flat-square" alt="Web3">
-  </p>
+
+# 🚀 InkLaunch Protocol
+
+**One-click ERC-20 token deployment on Ink Sepolia**
+
+[![Testnet](https://img.shields.io/badge/network-Ink%20Sepolia-7F77DD?style=flat-square)](https://explorer-sepolia.inkonchain.com)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)](https://nextjs.org)
+[![License](https://img.shields.io/badge/license-MIT-1D9E75?style=flat-square)](LICENSE)
+[![WalletConnect](https://img.shields.io/badge/RainbowKit-v2-7F77DD?style=flat-square)](https://www.rainbowkit.com)
+
+Connect your wallet → configure your token → deploy. No Solidity knowledge required.
+
+[**Live Demo**](https://inklaunch.vercel.app) · [**Ink Explorer**](https://explorer-sepolia.inkonchain.com) · [**Get Testnet ETH**](https://faucet.inkonchain.com)
+
 </div>
 
 ---
 
-## 🌟 Overview
-
-**InkLaunch** is a production-ready token factory built specifically for the **Ink Ecosystem**. It allows anyone to instantly deploy fully compliant ERC-20 tokens directly from their browser or mobile wallet. 
-
-Built with an obsessive focus on UX and performance, InkLaunch eliminates the technical barriers of smart contract deployment, allowing builders to focus on community and utility.
-
 ## ✨ Features
 
-- **🚀 10-Second Deployments:** Launch a fully functional ERC-20 token in seconds.
-- **📱 Universal Wallet Support:** Integrated deeply with RainbowKit & WalletConnect v2 for flawless desktop and mobile onboarding.
-- **💎 Premium UX/UI:** Fluid animations (Framer Motion), glassmorphism design, and interactive feedback (Canvas Confetti).
-- **🛡️ Built-in Safeguards:** Real-time form validation, automatic network switching, and "zero balance" gas faucets.
-- **💼 Token Management:** Built-in Dashboard to track all deployed tokens, check balances, and 1-click "Add to Wallet" via `watchAsset`.
-- **⚡ Next-Gen Tech Stack:** Powered by Next.js 14, viem, wagmi v2, and customized Tailwind.
+| | |
+|---|---|
+| ⚡ **One-click deploy** | Deploy a fully functional ERC-20 token in seconds via audited factory contract |
+| 📊 **Command Center** | Dashboard with all deployed tokens, ownership tracking, search & sort |
+| 🔗 **Multi-wallet** | MetaMask, Coinbase, Rainbow, Trust Wallet, WalletConnect QR and more |
+| 🌌 **Space UI** | Dark cosmic theme · aurora effects · starfield background · 3D tilt cards · cursor trail |
+| 🛡 **Session recovery** | Auto-reconnect with WalletConnect session error handling & cleanup |
+| 🔍 **On-chain indexing** | Reads `TokenCreated` events to accurately track tokens you deployed |
 
-## 🏗️ Architecture
+---
 
-InkLaunch relies on a single, highly optimized, pre-audited Smart Contract acting as a Factory on the Ink Sepolia Testnet.
+## 🖥 Pages
 
-**Ink Factory Contract:** `0x0BEb9438A24d119d600158F2CB829F461f5eFf5C`
+### `/` — Landing
+Animated hero with starfield, aurora gradient, feature highlights and CTA to launch.
 
-When a user submits the form, the Factory contract deploys a new standard ERC-20 clone on behalf of the user, assigning them 100% of the initial supply and setting them as the owner.
+### `/launch` — Deploy Token
+Form to set token name, symbol, and initial supply. Deploys via factory contract with live tx feedback.
 
-## 🛠️ Quick Start
+### `/dashboard` — Command Center
+- Stats: ETH balance · total contracts · your contracts · network status
+- Grid of all tokens deployed via factory
+- Ownership via `TokenCreated` event filtering (accurate even after transferring tokens)
+- Search by address · sort newest/oldest · copy address · add to wallet · open explorer
 
-Want to run InkLaunch locally? It's plug-and-play.
+---
+
+## 🛠 Tech Stack
+
+**Frontend**
+- [Next.js 14](https://nextjs.org) (App Router)
+- [TypeScript](https://www.typescriptlang.org)
+- [Tailwind CSS](https://tailwindcss.com)
+- [Framer Motion](https://www.framer.com/motion/)
+
+**Web3**
+- [wagmi v2](https://wagmi.sh)
+- [viem](https://viem.sh)
+- [RainbowKit](https://www.rainbowkit.com)
+- [@tanstack/react-query](https://tanstack.com/query)
+
+**Network**
+- [Ink Sepolia](https://inkonchain.com) — Chain ID `763373`
+
+---
+
+## 🌐 Network Config
+
+```
+Network:  Ink Sepolia (Testnet)
+Chain ID: 763373
+RPC:      https://rpc-gel-sepolia.inkonchain.com
+Explorer: https://explorer-sepolia.inkonchain.com
+Faucet:   https://faucet.inkonchain.com
+```
+
+---
+
+## 🔌 Supported Wallets
+
+| Wallet | Desktop | Mobile |
+|--------|---------|--------|
+| 🦊 MetaMask | ✅ Extension | ✅ WalletConnect QR |
+| 🔵 Coinbase Wallet | ✅ Extension | ✅ WalletConnect QR |
+| 🌈 Rainbow | ✅ Extension | ✅ Deep link |
+| 🛡 Trust Wallet | — | ✅ Deep link / WC QR |
+| 🔗 WalletConnect | ✅ QR fallback | ✅ Any WC-compatible |
+| 🔒 Safe (Gnosis) | ✅ Multisig | — |
+
+> **Note:** Mobile wallets require HTTPS. They work on the deployed version but not on `http://localhost`.
+
+---
+
+## 🚀 Quick Start
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/yourusername/ink-quicklaunch.git
-cd ink-quicklaunch
+# 1. Clone
+git clone https://github.com/your-username/inklaunch
+cd inklaunch
 
-# 2. Install dependencies
+# 2. Install
 npm install
 
-# 3. Start the development server
+# 3. Configure environment
+cp .env.example .env.local
+```
+
+Edit `.env.local`:
+```env
+NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id_here
+```
+
+> Get your free Project ID at [cloud.walletconnect.com](https://cloud.walletconnect.com)
+
+```bash
+# 4. Run
 npm run dev
 ```
-Navigate to `http://localhost:3000`. No `.env` configuration is strictly required to run the frontend.
 
-## 🏆 Ink Spark Grant
+Open [http://localhost:3000](http://localhost:3000)
 
-This project is built for the **Ink Builder Program - Spark**.
+---
 
-**Why InkLaunch deserves the Spark Grant:**
-1. **Public Good:** Provides immediate utility to other developers and creators entering the Ink ecosystem.
-2. **High Quality:** Focuses on a premium, consumer-grade experience over a simple MVP. It just works.
-3. **Scalable:** The underlying architecture (App Router, Viem, React Query) is ready for Mainnet scaling.
+## ☁️ Deploy to Vercel
 
-## 📄 License
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/inklaunch)
 
-MIT License - free to use, modify, and distribute. Built for the Ink Community.
+1. Import repo on [vercel.com](https://vercel.com)
+2. Add environment variable:
+   ```
+   NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID = your_id_here
+   ```
+3. Deploy — Vercel auto-detects Next.js, no config needed
+
+---
+
+## 📁 Project Structure
+
+```
+inklaunch/
+├── app/
+│   ├── page.tsx              # Landing page
+│   ├── launch/page.tsx       # Token deploy form
+│   └── dashboard/page.tsx    # Command center
+├── components/
+│   ├── Web3Inner.tsx         # wagmi + RainbowKit config
+│   ├── BalanceProvider.tsx   # Global ETH balance context
+│   └── ...
+├── lib/
+│   └── contracts.ts          # Factory ABI + address
+└── .env.example
+```
+
+---
+
+## 📄 Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | ✅ Yes | From [cloud.walletconnect.com](https://cloud.walletconnect.com) |
+
+---
+
+## 📜 License
+
+MIT — feel free to fork and build on top.
+
+---
+
+<div align="center">
+
+Built for the **Ink Sepolia** ecosystem · Powered by RainbowKit + wagmi + viem
+
+</div>

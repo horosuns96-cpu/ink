@@ -1,4 +1,15 @@
 import type { Metadata, Viewport } from "next";
+import dynamic from "next/dynamic";
+import "./globals.css";
+import "@rainbow-me/rainbowkit/styles.css";
+import { Web3Provider } from "./providers";
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { Header } from '@/components/Header';
+
+const Toaster = dynamic(() => import('sonner').then((mod) => mod.Toaster), { ssr: false });
+const BackgroundBlobs = dynamic(() => import('@/components/BackgroundBlobs').then((mod) => mod.BackgroundBlobs), { ssr: false });
+const StarField = dynamic(() => import('@/components/StarField').then((mod) => mod.StarField), { ssr: false });
+const CursorTrail = dynamic(() => import('@/components/CursorTrail').then((mod) => mod.CursorTrail), { ssr: false });
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -6,16 +17,6 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
 };
-import "./globals.css";
-import "@rainbow-me/rainbowkit/styles.css";
-import { Web3Provider } from "./providers";
-import { Header } from "@/components/Header";
-import { Toaster } from 'sonner';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { PageTransition } from '@/components/PageTransition';
-import { BackgroundBlobs } from '@/components/BackgroundBlobs';
-import { StarField } from '@/components/StarField';
-import { CursorTrail } from '@/components/CursorTrail';
 
 export const metadata: Metadata = {
   title: "InkLaunch — Token Factory on Ink Sepolia",
@@ -35,6 +36,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className="dark">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
       <body className="bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-900 via-black to-black text-white antialiased min-h-screen selection:bg-purple-500/30 selection:text-white">
         <BackgroundBlobs />
         <StarField />
@@ -42,9 +47,7 @@ export default function RootLayout({
         <ErrorBoundary>
           <Web3Provider>
             <Header />
-            <PageTransition>
-              {children}
-            </PageTransition>
+            {children}
           </Web3Provider>
         </ErrorBoundary>
         <Toaster position="bottom-right" theme="dark" richColors />

@@ -1,25 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function IntroSequence() {
   const [showIntro, setShowIntro] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const initialized = useRef(false);
 
   useEffect(() => {
-    setMounted(true);
+    if (initialized.current) return;
+    initialized.current = true;
     const hasSeenIntro = sessionStorage.getItem('ink_nebula_intro');
     if (!hasSeenIntro) {
       sessionStorage.setItem('ink_nebula_intro', 'true');
       setShowIntro(true);
-      // Auto-dismiss after 2.2s total
       const t = setTimeout(() => setShowIntro(false), 2200);
       return () => clearTimeout(t);
     }
   }, []);
-
-  if (!mounted) return null;
 
   return (
     <AnimatePresence>

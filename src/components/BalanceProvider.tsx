@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, ReactNode, useMemo, useCallback } from 'react';
 import { useAccount, useBalance } from 'wagmi';
 
 type BalanceContextType = {
@@ -32,15 +32,19 @@ export function BalanceProvider({ children }: { children: ReactNode }) {
   const balanceFormatted = activeBalance.toFixed(4);
   const hasBalance = activeBalance > 0;
 
+  const refetchBalance = useCallback(() => {
+    if (isConnected) refetch();
+  }, [isConnected, refetch]);
+
+  const contextValue = useMemo(() => ({
+    balanceFormatted,
+    hasBalance,
+    refetchBalance,
+    isLoading: isConnected && isLoading,
+  }), [balanceFormatted, hasBalance, refetchBalance, isConnected, isLoading]);
+
   return (
-    <BalanceContext.Provider
-      value={{
-        balanceFormatted,
-        hasBalance,
-        refetchBalance: () => { if (isConnected) refetch(); },
-        isLoading: isConnected && isLoading,
-      }}
-    >
+    <BalanceContext.Provider value={contextValue}>
       {children}
     </BalanceContext.Provider>
   );

@@ -3,12 +3,12 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { RainbowKitProvider, getDefaultConfig, darkTheme } from '@rainbow-me/rainbowkit';
 import {
-  metaMaskWallet,
   coinbaseWallet,
   walletConnectWallet,
   rainbowWallet,
   injectedWallet,
-  phantomWallet,
+  trustWallet,
+  safeWallet,
 } from '@rainbow-me/rainbowkit/wallets';
 import { WagmiProvider, useAccount, useDisconnect } from 'wagmi';
 import { QueryClientProvider, QueryClient, useQueryClient } from '@tanstack/react-query';
@@ -42,21 +42,22 @@ export const config = getDefaultConfig({
   appName: 'InkLaunch Protocol',
   projectId: 'e6e6a80c62bfd3d095c47aaa8b2e439e',
   chains: [inkSepolia],
-  ssr: true,
-  multiInjectedProviderDiscovery: true,
+  ssr: false,
+  multiInjectedProviderDiscovery: false,
   appDescription: 'InkLaunch is the fastest way to deploy ERC-20 tokens on Ink Sepolia.',
   appUrl: getAppUrl(),
   appIcon: 'https://inkonchain.com/favicon.ico',
   wallets: [
     {
       groupName: 'Popular',
-      // trustWallet excluded: broken with custom testnet EVM chains via WalletConnect
-      // Trust Wallet users can still connect via WalletConnect QR or injected provider
-      wallets: [metaMaskWallet, coinbaseWallet, rainbowWallet, phantomWallet],
+      // injectedWallet auto-detects MetaMask, Rabby, Brave Wallet and any other injected provider
+      wallets: [injectedWallet, coinbaseWallet, rainbowWallet, trustWallet],
     },
     {
-      groupName: 'More',
-      wallets: [walletConnectWallet, injectedWallet],
+      groupName: 'Other',
+      // walletConnectWallet: QR code fallback — works with ALL WC-compatible wallets
+      // safeWallet: Gnosis Safe multisig
+      wallets: [walletConnectWallet, safeWallet],
     },
   ],
 });
@@ -68,7 +69,7 @@ function FullScreenLoader() {
   if (!isReconnecting) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/80 animate-in fade-in duration-300">
       <Loader2 className="w-12 h-12 text-purple-500 animate-spin mb-6 drop-shadow-[0_0_15px_rgba(168,85,247,0.6)]" />
       <h3 className="text-xl font-black text-white tracking-widest uppercase mb-2">Restoring Session</h3>
       <p className="text-xs text-purple-400 font-medium">Please wait a moment...</p>
@@ -87,7 +88,7 @@ function SessionManager() {
       onChange(data) {
         if (data.status === 'connected') {
           console.log('[SessionManager] watchAccount triggered. Invalidating cache.');
-          queryClient.invalidateQueries();
+          queryClient.invalidateQueries({ refetchType: 'active' });
         }
       }
     });
@@ -153,7 +154,6 @@ export function Web3Inner({ children }: { children: ReactNode }) {
             accentColorForeground: 'white',
             borderRadius: 'large',
             fontStack: 'system',
-            overlayBlur: 'small',
           })}
           locale="en-US"
         >

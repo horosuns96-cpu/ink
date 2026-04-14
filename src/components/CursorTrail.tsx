@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { subscribeRaf } from '@/lib/rafScheduler';
 
 interface TrailPoint {
   x: number;
@@ -8,11 +9,10 @@ interface TrailPoint {
   alpha: number;
 }
 
-const TRAIL_LENGTH = 22;
+const TRAIL_LENGTH = 14;
 
 export function CursorTrail() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const rafRef = useRef<number | null>(null);
   const trailRef = useRef<TrailPoint[]>([]);
   const mouseRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -42,26 +42,52 @@ export function CursorTrail() {
     };
     window.addEventListener('mousemove', onMove, { passive: true });
 
-    const draw = () => {
-      const mouse = mouseRef.current;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let w = window.innerWidth;
+    let h = window.innerHeight;
+    let needsClear = false;
 
+    const origResize = resize;
+    window.removeEventListener('resize', resize);
+    const resizeWithCache = () => {
+      origResize();
+      w = canvas.width;
+      h = canvas.height;
+    };
+    window.addEventListener('resize', resizeWithCache, { passive: true });
+
+    const draw = (_timestamp: number) => {
+      const mouse = mouseRef.current;
+      const trail = trailRef.current;
+
+      // Only push if mouse actually moved
       if (mouse) {
-        // Push new point
-        trailRef.current.push({ x: mouse.x, y: mouse.y, alpha: 1 });
-        if (trailRef.current.length > TRAIL_LENGTH) {
-          trailRef.current.shift();
+        const last = trail[trail.length - 1];
+        if (!last || last.x !== mouse.x || last.y !== mouse.y) {
+          trail.push({ x: mouse.x, y: mouse.y, alpha: 1 });
+          if (trail.length > TRAIL_LENGTH) trail.shift();
         }
       }
 
-      // Decay alpha
-      for (let i = 0; i < trailRef.current.length; i++) {
-        trailRef.current[i].alpha *= 0.88;
+      // Decay and prune fully faded points
+      for (let i = trail.length - 1; i >= 0; i--) {
+        trail[i].alpha *= 0.88;
+        if (trail[i].alpha < 0.01) trail.splice(i, 1);
       }
 
-      // Draw
-      for (let i = 0; i < trailRef.current.length; i++) {
-        const p = trailRef.current[i];
+      // Nothing active — clear once then skip
+      if (trail.length === 0) {
+        if (needsClear) {
+          ctx.clearRect(0, 0, w, h);
+          needsClear = false;
+        }
+        return;
+      }
+
+      needsClear = true;
+      ctx.clearRect(0, 0, w, h);
+
+      for (let i = 0; i < trail.length; i++) {
+        const p = trail[i];
         const norm = i / TRAIL_LENGTH;
         // Interpolate purple(168,85,247) → cyan(6,182,212)
         const r = Math.round(168 + (6 - 168) * norm);
@@ -80,15 +106,14 @@ export function CursorTrail() {
         ctx.fillStyle = `rgba(${r},${g},${b},${p.alpha * 0.08})`;
         ctx.fill();
       }
-
-      rafRef.current = requestAnimationFrame(draw);
     };
-    rafRef.current = requestAnimationFrame(draw);
+
+    const unsubscribe = subscribeRaf(draw);
 
     return () => {
-      window.removeEventListener('resize', resize);
+      window.removeEventListener('resize', resizeWithCache);
       window.removeEventListener('mousemove', onMove);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      unsubscribe();
     };
   }, []);
 
