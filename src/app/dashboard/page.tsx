@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useAccount, useReadContract, useReadContracts, useWatchAsset, useSwitchChain, useChainId, usePublicClient } from 'wagmi';
 import { parseAbiItem } from 'viem';
 import { INK_FACTORY_ABI, INK_FACTORY_ADDRESS } from '@/lib/contracts';
 import { formatEther } from 'viem';
 import { useGlobalBalance } from '@/components/BalanceProvider';
 import { motion } from 'framer-motion';
-import { Rocket, ExternalLink, Copy, CheckCircle, Coins, LayoutDashboard, Plus, Loader2, Package, Wallet, Search, ArrowDownAZ, ArrowUpAZ, Clock } from 'lucide-react';
+import { Rocket, ExternalLink, Copy, CheckCircle, Coins, LayoutDashboard, Plus, Loader2, Package, Wallet, Search, ArrowDownAZ, ArrowUpAZ, Clock, TrendingDown, TrendingUp, Star } from 'lucide-react';
 import Link from 'next/link';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { toast } from 'sonner';
@@ -21,7 +21,7 @@ const ERC20_BALANCE_OF_ABI = [
   { inputs: [], name: 'totalSupply', outputs: [{ name: '', type: 'uint256' }], stateMutability: 'view', type: 'function' },
 ] as const;
 
-type SortMode = 'newest' | 'oldest';
+type SortMode = 'newest' | 'oldest' | 'mine' | 'supply_desc' | 'supply_asc';
 
 interface TokenData {
   name?: string;
@@ -158,16 +158,23 @@ export default function DashboardPage() {
     address: INK_FACTORY_ADDRESS,
     abi: INK_FACTORY_ABI,
     functionName: 'getDeployedTokens',
-    query: { staleTime: 30_000 }
+    query: { staleTime: 120_000 }
   });
+
+  const [myTokenAddresses, setMyTokenAddresses] = useState<string[]>([]);
+  const [isLoadingOwned, setIsLoadingOwned] = useState(false);
+  const cacheRef = useRef<{ address: string; tokens: string[] } | null>(null);
 
   const tokenList = useMemo(() => {
     const raw = (allTokens as string[] | undefined) || [];
-    const sorted = sortMode === 'newest' ? [...raw].reverse() : [...raw];
-    if (!search.trim()) return sorted;
+    let list = sortMode === 'oldest' ? [...raw] : [...raw].reverse();
+    if (sortMode === 'mine') {
+      list = list.filter(addr => myTokenAddresses.includes(addr));
+    }
+    if (!search.trim()) return list;
     const q = search.trim().toLowerCase();
-    return sorted.filter(addr => addr.toLowerCase().includes(q));
-  }, [allTokens, sortMode, search]);
+    return list.filter(addr => addr.toLowerCase().includes(q));
+  }, [allTokens, sortMode, search, myTokenAddresses]);
 
   const batchContracts = useMemo(() =>
     tokenList.flatMap(addr => [
@@ -200,12 +207,32 @@ export default function DashboardPage() {
     );
   }, [batchData, tokenList]);
 
+  const displayList = useMemo(() => {
+    if (sortMode === 'supply_desc') {
+      return [...tokenList].sort((a, b) => {
+        const supA = tokenDataMap[a]?.totalSupply ?? BigInt(0);
+        const supB = tokenDataMap[b]?.totalSupply ?? BigInt(0);
+        return supB > supA ? 1 : -1;
+      });
+    }
+    if (sortMode === 'supply_asc') {
+      return [...tokenList].sort((a, b) => {
+        const supA = tokenDataMap[a]?.totalSupply ?? BigInt(0);
+        const supB = tokenDataMap[b]?.totalSupply ?? BigInt(0);
+        return supA > supB ? 1 : -1;
+      });
+    }
+    return tokenList;
+  }, [tokenList, sortMode, tokenDataMap]);
+
   const publicClient = usePublicClient();
-  const [myTokenAddresses, setMyTokenAddresses] = useState<string[]>([]);
-  const [isLoadingOwned, setIsLoadingOwned] = useState(false);
 
   useEffect(() => {
     if (!address || !publicClient) return;
+    if (cacheRef.current?.address === address) {
+      setMyTokenAddresses(cacheRef.current.tokens);
+      return;
+    }
     setIsLoadingOwned(true);
     publicClient.getLogs({
       address: INK_FACTORY_ADDRESS,
@@ -216,6 +243,7 @@ export default function DashboardPage() {
       const mine = logs
         .filter(l => l.args.owner?.toLowerCase() === address.toLowerCase())
         .map(l => l.args.tokenAddress as string);
+      cacheRef.current = { address, tokens: mine };
       setMyTokenAddresses(mine);
     })
     .catch(console.error)
@@ -285,20 +313,27 @@ export default function DashboardPage() {
                   />
                 </div>
                 {/* Sort */}
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
                   <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold hidden sm:block">Sort</span>
-                  <button
-                    onClick={() => setSortMode('newest')}
-                    className={`flex items-center gap-1.5 px-4 py-3 rounded-2xl text-xs font-bold transition-colors ${sortMode === 'newest' ? 'bg-purple-600 text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]' : 'bg-neutral-900 border border-white/10 text-white/40 hover:text-white'}`}
-                  >
-                    <Clock className="w-3.5 h-3.5" /> Newest
-                  </button>
-                  <button
-                    onClick={() => setSortMode('oldest')}
-                    className={`flex items-center gap-1.5 px-4 py-3 rounded-2xl text-xs font-bold transition-colors ${sortMode === 'oldest' ? 'bg-purple-600 text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]' : 'bg-neutral-900 border border-white/10 text-white/40 hover:text-white'}`}
-                  >
-                    <ArrowUpAZ className="w-3.5 h-3.5" /> Oldest
-                  </button>
+                  {([
+                    { mode: 'newest' as SortMode, icon: <Clock className="w-3.5 h-3.5" />, label: 'Newest' },
+                    { mode: 'oldest' as SortMode, icon: <ArrowUpAZ className="w-3.5 h-3.5" />, label: 'Oldest' },
+                    { mode: 'mine' as SortMode, icon: <Star className="w-3.5 h-3.5" />, label: 'Mine' },
+                    { mode: 'supply_desc' as SortMode, icon: <TrendingDown className="w-3.5 h-3.5" />, label: 'Supply ↓' },
+                    { mode: 'supply_asc' as SortMode, icon: <TrendingUp className="w-3.5 h-3.5" />, label: 'Supply ↑' },
+                  ] as const).map(({ mode, icon, label }) => (
+                    <button
+                      key={mode}
+                      onClick={() => setSortMode(mode)}
+                      className={`flex items-center gap-1.5 px-3 py-2.5 rounded-2xl text-xs font-bold transition-colors ${
+                        sortMode === mode
+                          ? 'bg-purple-600 text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]'
+                          : 'bg-neutral-900 border border-white/10 text-white/40 hover:text-white'
+                      }`}
+                    >
+                      {icon} {label}
+                    </button>
+                  ))}
                 </div>
               </motion.div>
 
@@ -306,7 +341,11 @@ export default function DashboardPage() {
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
                 <span className="text-sm text-white/60">
-                  {search ? `${tokenList.length} of ${totalCount}` : totalCount} {totalCount === 1 ? 'asset' : 'assets'}
+                  {sortMode === 'mine'
+                    ? `${displayList.length} owned by you`
+                    : search
+                    ? `${displayList.length} of ${totalCount}`
+                    : totalCount} {totalCount === 1 ? 'asset' : 'assets'}
                 </span>
               </div>
 
@@ -324,16 +363,22 @@ export default function DashboardPage() {
                     Engage
                   </Link>
                 </div>
-              ) : tokenList.length === 0 ? (
+              ) : displayList.length === 0 ? (
                 <div className="rounded-3xl border border-white/5 bg-neutral-900 p-16 text-center flex flex-col items-center">
-                  <Search className="w-10 h-10 text-white/20 mb-4" />
-                  <h3 className="text-lg font-medium text-white mb-2">No results</h3>
-                  <p className="text-white/40 text-sm">No contracts match <span className="text-purple-400">"{search}"</span></p>
-                  <button onClick={() => setSearch('')} className="mt-4 text-xs text-purple-400 hover:text-purple-300 underline">Clear search</button>
+                  {sortMode === 'mine' ? (
+                    <><Star className="w-10 h-10 text-white/20 mb-4" />
+                    <h3 className="text-lg font-medium text-white mb-2">No owned tokens</h3>
+                    <p className="text-white/40 text-sm">You haven't deployed any tokens yet.</p></>
+                  ) : (
+                    <><Search className="w-10 h-10 text-white/20 mb-4" />
+                    <h3 className="text-lg font-medium text-white mb-2">No results</h3>
+                    <p className="text-white/40 text-sm">No contracts match <span className="text-purple-400">"{search}"</span></p>
+                    <button onClick={() => setSearch('')} className="mt-4 text-xs text-purple-400 hover:text-purple-300 underline">Clear search</button></>
+                  )}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-                  {tokenList.map((tokenAddr, i) => (
+                  {displayList.map((tokenAddr, i) => (
                     <TokenCard key={tokenAddr} tokenAddress={tokenAddr} tokenData={tokenDataMap[tokenAddr] ?? {}} index={i} />
                   ))}
                 </div>

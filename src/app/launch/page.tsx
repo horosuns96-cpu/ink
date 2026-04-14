@@ -11,22 +11,15 @@ import { toast } from 'sonner';
 import { INK_FACTORY_ABI, INK_FACTORY_ADDRESS } from '@/lib/contracts';
 import { useGlobalBalance } from '@/components/BalanceProvider';
 import Link from 'next/link';
-import { use3DTilt } from '@/hooks/use3DTilt';
-
 const INK_SEPOLIA_CHAIN_ID = 763373;
 
-// Right col preview with 3D tilt
+// Right col preview
 function PreviewCard({ name, symbol, supply }: { name: string; symbol: string; supply: string }) {
-  const { ref, onMouseMove, onMouseEnter, onMouseLeave } = use3DTilt({ max: 14, scale: 1.03 });
   return (
     <motion.div
-      ref={ref}
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.1 }}
-      onMouseMove={onMouseMove}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
       className="xl:col-span-2 rounded-3xl bg-neutral-900 border border-cyan-500/10 p-6 sm:p-8 flex flex-col items-center justify-center relative overflow-hidden group transform-gpu"
     >
        {/* Decorative background grid inside preview */}
