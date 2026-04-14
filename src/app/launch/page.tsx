@@ -116,7 +116,8 @@ export default function LaunchPage() {
             <div>
               <h2 className="text-2xl font-medium tracking-tight mb-2 text-white">Verification Needed</h2>
               <p className="text-sm text-white/50 mb-8 max-w-xs mx-auto">Link a secure enclave to initialize the compiler sequence.</p>
-              <div className="flex justify-center"><ConnectButton /></div>
+              <div className="flex justify-center mb-6"><ConnectButton /></div>
+              <p className="text-[11px] text-yellow-500/70 max-w-xs mx-auto leading-relaxed">⚠️ Recommended: MetaMask or Coinbase Wallet browser extension. Mobile wallets may not support Ink Sepolia yet.</p>
             </div>
           </motion.div>
         ) : isWrongChain ? (

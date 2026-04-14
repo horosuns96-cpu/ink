@@ -24,6 +24,7 @@ Connect your wallet → configure your token → deploy. No Solidity knowledge r
 | ⚡ **One-click deploy** | Deploy a fully functional ERC-20 token in seconds via audited factory contract |
 | 📊 **Command Center** | Dashboard with all deployed tokens, ownership tracking, search & sort |
 | 🔗 **Multi-wallet** | MetaMask, Coinbase, Rainbow, Trust Wallet, WalletConnect QR and more |
+| ⚠️ **Wallet note** | Recommended: MetaMask or Coinbase Wallet browser extension. Mobile wallets may not support Ink Sepolia yet. |
 | 🌌 **Space UI** | Dark cosmic theme · aurora effects · starfield background · 3D tilt cards · cursor trail |
 | 🛡 **Session recovery** | Auto-reconnect with WalletConnect session error handling & cleanup |
 | 🔍 **On-chain indexing** | Reads `TokenCreated` events to accurately track tokens you deployed |
