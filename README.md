@@ -96,7 +96,7 @@ Faucet:   https://faucet.inkonchain.com
 
 ```bash
 # 1. Clone
-git clone https://github.com/your-username/inklaunch
+git clone https://github.com/horosuns96-gpu
 cd inklaunch
 
 # 2. Install
