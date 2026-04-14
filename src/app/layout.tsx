@@ -20,6 +20,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://inklaunch.vercel.app'),
   title: "InkLaunch — Token Factory on Ink Sepolia",
   description: "Deploy ERC-20 tokens instantly on the Ink Sepolia network. Fast, simple, and gasless launching for builders.",
   keywords: ["Ink Sepolia", "ERC-20", "Token Factory", "Web3", "DeFi"],
@@ -27,7 +28,14 @@ export const metadata: Metadata = {
     title: "InkLaunch — Token Factory",
     description: "Deploy your ERC-20 token on Ink Sepolia in seconds. No code required.",
     type: "website",
-  }
+    url: "https://inklaunch.vercel.app",
+    siteName: "InkLaunch",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "InkLaunch — Token Factory on Ink Sepolia",
+    description: "Deploy your ERC-20 token on Ink Sepolia in seconds. No code required.",
+  },
 };
 
 export default function RootLayout({
