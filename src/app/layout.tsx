@@ -5,6 +5,7 @@ import "@rainbow-me/rainbowkit/styles.css";
 import { Web3Provider } from "./providers";
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 
 const Toaster = dynamic(() => import('sonner').then((mod) => mod.Toaster), { ssr: false });
 const BackgroundBlobs = dynamic(() => import('@/components/BackgroundBlobs').then((mod) => mod.BackgroundBlobs), { ssr: false });
@@ -48,6 +49,7 @@ export default function RootLayout({
           <Web3Provider>
             <Header />
             {children}
+            <Footer />
           </Web3Provider>
         </ErrorBoundary>
         <Toaster position="bottom-right" theme="dark" richColors />
