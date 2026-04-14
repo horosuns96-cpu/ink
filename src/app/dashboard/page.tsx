@@ -6,7 +6,6 @@ import { parseAbiItem } from 'viem';
 import { INK_FACTORY_ABI, INK_FACTORY_ADDRESS } from '@/lib/contracts';
 import { formatEther } from 'viem';
 import { useGlobalBalance } from '@/components/BalanceProvider';
-import { motion } from 'framer-motion';
 import { Rocket, ExternalLink, Copy, CheckCircle, Coins, LayoutDashboard, Plus, Loader2, Package, Wallet, Search, ArrowDownAZ, ArrowUpAZ, Clock, TrendingDown, TrendingUp, Star } from 'lucide-react';
 import Link from 'next/link';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
@@ -59,12 +58,7 @@ const TokenCard = React.memo(function TokenCard({ tokenAddress, tokenData, index
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: Math.min(index * 0.04, 0.4), duration: 0.3 }}
-      className="p-6 space-y-4 rounded-3xl bg-neutral-900 border border-purple-500/10 hover:border-purple-500/30 transition-colors duration-200 hover:shadow-[0_0_30px_rgba(168,85,247,0.12)] flex flex-col justify-between"
-    >
+    <div className="p-6 space-y-4 rounded-3xl bg-neutral-900 border border-purple-500/10 hover:border-purple-500/30 transition-colors duration-200 hover:shadow-[0_0_30px_rgba(168,85,247,0.12)] flex flex-col justify-between">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500/20 to-cyan-500/20 border border-purple-500/20 flex items-center justify-center font-black text-xs text-cyan-400 shrink-0">
@@ -127,7 +121,7 @@ const TokenCard = React.memo(function TokenCard({ tokenAddress, tokenData, index
           <ExternalLink className="w-4 h-4" />
         </a>
       </div>
-    </motion.div>
+    </div>
   );
 });
 
@@ -268,7 +262,7 @@ export default function DashboardPage() {
     <div className="relative pt-24 pb-16 px-4">
       <main className="relative z-10 w-full max-w-[1600px] mx-auto">
         {!isConnected ? (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-md mx-auto rounded-[2rem] bg-neutral-900 border border-purple-500/20 p-12 text-center space-y-6 mt-20 shadow-[0_0_50px_rgba(168,85,247,0.1)] transform-gpu">
+          <div className="max-w-md mx-auto rounded-[2rem] bg-neutral-900 border border-purple-500/20 p-12 text-center space-y-6 mt-20 shadow-[0_0_50px_rgba(168,85,247,0.1)] transform-gpu">
             <div className="w-20 h-20 mx-auto rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
               <LayoutDashboard className="w-10 h-10 text-purple-400" />
             </div>
@@ -278,11 +272,11 @@ export default function DashboardPage() {
               <div className="flex justify-center mb-6"><ConnectButton /></div>
               <p className="text-[11px] text-yellow-500/70 max-w-xs mx-auto leading-relaxed">⚠️ Recommended: MetaMask or Coinbase Wallet browser extension. Mobile wallets may not support Ink Sepolia yet.</p>
             </div>
-          </motion.div>
+          </div>
         ) : (
           <div className="space-y-10">
             {/* Header */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
               <div>
                 <h1 className="text-4xl md:text-5xl font-medium tracking-tighter text-white">Command Center</h1>
                 <p className="text-purple-400 mt-2 font-mono text-xs tracking-widest break-all">{address}</p>
@@ -290,10 +284,10 @@ export default function DashboardPage() {
               <Link href="/launch" className="px-6 py-3 rounded-full bg-white text-black font-bold text-sm hover:scale-105 active:scale-95 transition-transform flex items-center gap-2 shrink-0">
                 <Plus className="w-4 h-4" /> New Token
               </Link>
-            </motion.div>
+            </div>
 
             {/* Stats */}
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
                 { label: 'Network Power', value: `${balanceFormatted} ETH`, icon: <Coins className="w-4 h-4 text-cyan-400" /> },
                 { label: 'Deployed Contracts', value: `${totalCount} Total`, sub: isLoadingOwned ? 'Scanning events...' : myTokenAddresses.length > 0 ? `${myTokenAddresses.length} deployed by you` : 'None deployed yet', icon: <Package className="w-4 h-4 text-purple-400" /> },
@@ -306,12 +300,12 @@ export default function DashboardPage() {
               ].map((stat, i) => (
                 <TiltStatCard key={i} stat={stat} />
               ))}
-            </motion.div>
+            </div>
 
             {/* Tokens */}
             <div>
               {/* Search + Sort Bar */}
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.12 }} className="flex flex-col sm:flex-row gap-3 mb-6">
+              <div className="flex flex-col sm:flex-row gap-3 mb-6">
                 {/* Search */}
                 <div className="relative flex-1">
                   <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" />
@@ -346,7 +340,7 @@ export default function DashboardPage() {
                     </button>
                   ))}
                 </div>
-              </motion.div>
+              </div>
 
               {/* Token count */}
               <div className="flex items-center gap-3 mb-4">
