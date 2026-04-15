@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useAccount, useReadContract, useReadContracts, useWatchAsset, useSwitchChain, useChainId, usePublicClient } from 'wagmi';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { parseAbiItem } from 'viem';
 import { INK_FACTORY_ABI, INK_FACTORY_ADDRESS, getFactoryAddress, getExplorerUrl, SUPPORTED_CHAIN_IDS } from '@/lib/contracts';
 import { formatEther } from 'viem';
@@ -157,8 +158,57 @@ export default function DashboardPage() {
     query: { staleTime: 300_000, enabled: !!factoryAddress }
   });
 
-  const [myTokenAddresses, setMyTokenAddresses] = useState<string[]>([]);
-  const [isLoadingOwned, setIsLoadingOwned] = useState(false);
+  const publicClient = usePublicClient();
+  const publicClientRef = useRef(publicClient);
+  publicClientRef.current = publicClient;
+
+  const { data: myTokenAddresses = [], isFetching: isLoadingOwned } = useQuery({
+    queryKey: ['owned-tokens', address, chainId],
+    queryFn: async () => {
+      const client = publicClientRef.current;
+      if (!address || !client) return [];
+
+      const cacheKey = `inklaunch-owned-${address}-${chainId}`;
+      try {
+        const stored = sessionStorage.getItem(cacheKey);
+        if (stored) return JSON.parse(stored) as string[];
+      } catch {}
+
+      const logAddress = getFactoryAddress(chainId) ?? INK_FACTORY_ADDRESS;
+      const CHUNK = chainId === 84532 ? BigInt(9999) : BigInt(99000);
+      const latest = await client.getBlockNumber();
+      const startBlock = chainId === 763373
+        ? BigInt(46850539)
+        : BigInt(39200000);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const allLogs: any[] = [];
+      let from = startBlock;
+      while (from <= latest) {
+        const to = from + CHUNK > latest ? latest : from + CHUNK;
+        const chunk = await client.getLogs({
+          address: logAddress,
+          event: parseAbiItem('event TokenCreated(address indexed tokenAddress, string name, string symbol, uint256 initialSupply, address owner)'),
+          fromBlock: from,
+          toBlock: to,
+        });
+        allLogs.push(...chunk);
+        from = to + BigInt(1);
+        if (from <= latest) await new Promise(r => setTimeout(r, 150));
+      }
+
+      const mine = allLogs
+        .filter(l => l.args.owner?.toLowerCase() === address.toLowerCase())
+        .map(l => l.args.tokenAddress as string);
+
+      try { sessionStorage.setItem(cacheKey, JSON.stringify(mine)); } catch {}
+      return mine;
+    },
+    enabled: !!address,
+    staleTime: Infinity,
+    gcTime: 600_000,
+    placeholderData: keepPreviousData,
+  });
 
   const tokenList = useMemo(() => {
     const raw = (allTokens as string[] | undefined) || [];
@@ -219,73 +269,6 @@ export default function DashboardPage() {
     }
     return tokenList;
   }, [tokenList, sortMode, tokenDataMap]);
-
-  const publicClient = usePublicClient();
-  const publicClientRef = useRef(publicClient);
-  publicClientRef.current = publicClient;
-
-  useEffect(() => {
-    if (!address || !publicClientRef.current) return;
-    const cacheKey = `inklaunch-owned-${address}-${chainId}`;
-    try {
-      const stored = sessionStorage.getItem(cacheKey);
-      if (stored) {
-        setMyTokenAddresses(JSON.parse(stored));
-        return;
-      }
-    } catch {}
-    let cancelled = false;
-
-    const logAddress = getFactoryAddress(chainId) ?? INK_FACTORY_ADDRESS;
-    setIsLoadingOwned(true);
-
-    const fetchPaginatedLogs = async () => {
-      const client = publicClientRef.current!;
-      // Base Sepolia RPC caps getLogs at 10,000 blocks per request
-      const CHUNK = chainId === 84532 ? BigInt(9999) : BigInt(99000);
-      const latest = await client.getBlockNumber();
-      const startBlock = chainId === 763373
-        ? BigInt(46850539)   // Ink Sepolia factory deployment block
-        : BigInt(39200000);  // Base Sepolia factory deployment block (~Apr 2025)
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const allLogs: any[] = [];
-      let from = startBlock;
-      while (from <= latest) {
-        if (cancelled) return allLogs;
-        const to = from + CHUNK > latest ? latest : from + CHUNK;
-        const chunk = await client.getLogs({
-          address: logAddress,
-          event: parseAbiItem('event TokenCreated(address indexed tokenAddress, string name, string symbol, uint256 initialSupply, address owner)'),
-          fromBlock: from,
-          toBlock: to,
-        });
-        allLogs.push(...chunk);
-        from = to + BigInt(1);
-        if (from <= latest) await new Promise(r => setTimeout(r, 150));
-      }
-      return allLogs;
-    };
-
-    fetchPaginatedLogs()
-    .then(logs => {
-      if (cancelled) return;
-      const mine = logs
-        .filter(l => l.args.owner?.toLowerCase() === address.toLowerCase())
-        .map(l => l.args.tokenAddress as string);
-      try { sessionStorage.setItem(cacheKey, JSON.stringify(mine)); } catch {}
-      setMyTokenAddresses(mine);
-    })
-    .catch(err => {
-      if (cancelled) return;
-      console.error(err);
-    })
-    .finally(() => {
-      if (!cancelled) setIsLoadingOwned(false);
-    });
-
-    return () => { cancelled = true; };
-  }, [address, chainId]);
 
   if (isReconnecting) return null;
 
