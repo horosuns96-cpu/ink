@@ -79,13 +79,13 @@ const TokenCard = React.memo(function TokenCard({ tokenAddress, tokenData, index
         <div className="px-3 py-2.5 rounded-2xl bg-black/40 border border-white/5">
           <div className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1">Supply</div>
           <div className="text-xs font-mono text-white/90 truncate">
-            {totalSupply ? Number(formatEther(totalSupply as bigint)).toLocaleString() : '...'}
+            {totalSupply !== undefined ? Number(formatEther(totalSupply as bigint)).toLocaleString() : '...'}
           </div>
         </div>
         <div className="px-3 py-2.5 rounded-2xl bg-black/40 border border-white/5">
           <div className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1">Balance</div>
           <div className="text-xs font-mono text-cyan-400 truncate">
-            {balance ? Number(formatEther(balance as bigint)).toLocaleString() : '...'}
+            {balance !== undefined ? Number(formatEther(balance as bigint)).toLocaleString() : '...'}
           </div>
         </div>
       </div>

@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAccount, useWriteContract, useWaitForTransactionReceipt, useChainId, useSwitchChain } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useChainId, useSwitchChain, useWatchAsset } from 'wagmi';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Rocket, Loader2, CheckCircle, Globe, ExternalLink, ShieldCheck } from 'lucide-react';
+import { Rocket, Loader2, CheckCircle, Globe, ExternalLink, ShieldCheck, Sparkles, Wallet } from 'lucide-react';
 import { parseEther, decodeEventLog } from 'viem';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import confetti from 'canvas-confetti';
@@ -11,6 +11,14 @@ import { toast } from 'sonner';
 import { INK_FACTORY_ABI, getFactoryAddress, getExplorerUrl, SUPPORTED_CHAIN_IDS } from '@/lib/contracts';
 import { useGlobalBalance } from '@/components/BalanceProvider';
 import Link from 'next/link';
+
+const BASED_NAMES = [
+  'Based Pepe', 'Ink Master', 'Blue Chip Gem', 'Superchain Hero',
+  'Onchain Legend', 'Ink Protocol', 'Based Builder', 'Chain Surfer',
+  'Ink Wizard', 'Base Degen', 'Superchain Star', 'Ink Punk',
+  'Based OG', 'Chain Max', 'Ink Rush', 'Base Maxi', 'Onchain Pioneer',
+  'Ink Spark', 'Layer Zero', 'Block Sage',
+];
 
 // Right col preview
 function PreviewCard({ name, symbol, supply, chainId }: { name: string; symbol: string; supply: string; chainId: number }) {
@@ -66,6 +74,7 @@ export default function LaunchPage() {
 
   const { data: hash, isPending: isWalletLoading, writeContractAsync } = useWriteContract();
   const { isLoading: isMining, isSuccess, data: receipt } = useWaitForTransactionReceipt({ hash });
+  const { watchAsset } = useWatchAsset();
 
   useEffect(() => {
     if (isSuccess && hash) {
@@ -160,6 +169,15 @@ export default function LaunchPage() {
                </div>
              )}
              
+             {deployedTokenAddress && symbol && (
+               <button
+                 onClick={async () => { try { await watchAsset({ type: 'ERC20', options: { address: deployedTokenAddress, symbol, decimals: 18 } }); } catch {} }}
+                 className="w-full mb-4 py-4 rounded-xl bg-purple-600/20 hover:bg-purple-600/40 text-purple-300 hover:text-white font-bold border border-purple-500/30 hover:border-purple-500/60 transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.15)] hover:shadow-[0_0_30px_rgba(168,85,247,0.3)]"
+               >
+                 <Wallet className="w-4 h-4" /> Add ${symbol} to Wallet
+               </button>
+             )}
+
              <div className="flex flex-col sm:flex-row gap-4 w-full mb-4">
                <button onClick={() => { setDeployedHash(null); setName(''); setSymbol(''); }} className="flex-1 py-4 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold tracking-tight border border-white/10 transition-colors">
                  Build New
@@ -205,7 +223,12 @@ export default function LaunchPage() {
 
                <form onSubmit={handleDeploy} className="space-y-6">
                  <div>
-                   <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest block mb-2">Full Asset Name</label>
+                   <div className="flex items-center justify-between mb-2">
+                     <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest">Full Asset Name</label>
+                     <button type="button" onClick={() => setName(BASED_NAMES[Math.floor(Math.random() * BASED_NAMES.length)])} className="flex items-center gap-1 text-[10px] font-bold text-purple-400/70 hover:text-purple-400 uppercase tracking-widest transition-colors">
+                       <Sparkles className="w-3 h-3" /> Generate
+                     </button>
+                   </div>
                    <input id="token-name" name="token-name" type="text" value={name} onChange={e => setName(e.target.value.slice(0, 32))} required minLength={2} maxLength={32} autoComplete="off" className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all" placeholder="e.g. Ink Protocol" />
                  </div>
                  <div className="grid grid-cols-2 gap-4">
@@ -221,9 +244,27 @@ export default function LaunchPage() {
 
                  <AnimatePresence mode="wait">
                     {isWorking ? (
-                      <motion.div key="loading" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="rounded-xl border border-purple-500/30 bg-purple-500/10 p-4 text-purple-400 flex items-center justify-center gap-3 overflow-hidden">
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        <span className="font-bold text-sm tracking-tight">{isWalletLoading ? 'Awaiting Wallet Signature...' : `Executing on ${chainId === 84532 ? 'Base' : 'Ink'}...`}</span>
+                      <motion.div key="loading" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="rounded-xl border border-purple-500/30 bg-purple-500/10 p-5 overflow-hidden space-y-3">
+                        {[
+                          { label: 'Awaiting Wallet Signature', active: isWalletLoading, done: !isWalletLoading },
+                          { label: `Broadcasting to ${chainId === 84532 ? 'Base Sepolia' : 'Ink Sepolia'}`, active: isMining, done: false },
+                          { label: 'Indexing on-chain data', active: false, done: false },
+                        ].map((step, i) => (
+                          <div key={i} className="flex items-center gap-3">
+                            <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all ${
+                              step.done ? 'bg-emerald-500/20 border-emerald-500/50' :
+                              step.active ? 'border-purple-400 bg-purple-500/20' :
+                              'border-white/10 bg-black/20'
+                            }`}>
+                              {step.done ? <CheckCircle className="w-3 h-3 text-emerald-400" /> :
+                               step.active ? <Loader2 className="w-3 h-3 text-purple-400 animate-spin" /> :
+                               <div className="w-1.5 h-1.5 rounded-full bg-white/20" />}
+                            </div>
+                            <span className={`text-xs font-bold tracking-tight transition-colors ${
+                              step.done ? 'text-emerald-400' : step.active ? 'text-purple-300' : 'text-white/30'
+                            }`}>{step.label}</span>
+                          </div>
+                        ))}
                       </motion.div>
                     ) : (
                       <motion.button key="submit" initial={{ opacity: 0 }} animate={{ opacity: 1 }} type="submit" className="w-full rounded-xl bg-white text-black hover:bg-purple-500 hover:text-white hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] py-4 font-bold text-sm uppercase tracking-widest transition-all duration-300">

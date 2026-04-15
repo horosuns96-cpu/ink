@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { RainbowKitProvider, getDefaultConfig, darkTheme } from '@rainbow-me/rainbowkit';
 import {
   coinbaseWallet,
@@ -34,6 +34,9 @@ const inkSepolia = defineChain({
     default: { name: 'Ink Explorer', url: 'https://explorer-sepolia.inkonchain.com' },
   },
   testnet: true,
+  contracts: {
+    multicall3: { address: '0xcA11bde05977b3631167028862bE2a173976CA11' },
+  },
 });
 
 // Determine appUrl dynamically so WalletConnect metadata matches the actual running host
