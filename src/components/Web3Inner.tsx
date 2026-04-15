@@ -10,11 +10,8 @@ import {
   metaMaskWallet,
   safeWallet,
   krakenWallet,
-  phantomWallet,
-  argentWallet,
   zerionWallet,
   okxWallet,
-  trustWallet,
 } from '@rainbow-me/rainbowkit/wallets';
 import { WagmiProvider, useAccount, useDisconnect } from 'wagmi';
 import { QueryClientProvider, QueryClient, useQueryClient } from '@tanstack/react-query';
@@ -61,7 +58,7 @@ export const config = getDefaultConfig({
     },
     {
       groupName: 'More',
-      wallets: [phantomWallet, zerionWallet, okxWallet, trustWallet, argentWallet, safeWallet, injectedWallet],
+      wallets: [zerionWallet, okxWallet, safeWallet, injectedWallet],
     },
   ],
 });
