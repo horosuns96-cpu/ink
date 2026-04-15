@@ -23,7 +23,7 @@ Connect your wallet → configure your token → deploy. No Solidity knowledge r
 | Network | Chain ID | Factory Contract | Status |
 |---|---|---|---|
 | **Ink Sepolia** | 763373 | [`0x0BEb9438...`](https://explorer-sepolia.inkonchain.com/address/0x0BEb9438A24d119d600158F2CB829F461f5eFf5C) | ✅ Live + Verified |
-| **Base Sepolia** | 84532 | deploy pending | 🔜 Coming Soon |
+| **Base Sepolia** | 84532 | [`0xe584C914...`](https://sepolia.basescan.org/address/0xe584C914413457cd7b6a310a17A449135415F1c3) | ✅ Live |
 | **Base Mainnet** | 8453 | — | 📋 Planned |
 
 ---

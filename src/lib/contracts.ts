@@ -2,7 +2,7 @@ export const INK_FACTORY_ADDRESS = "0x0BEb9438A24d119d600158F2CB829F461f5eFf5C";
 
 export const FACTORY_ADDRESSES: Record<number, `0x${string}` | null> = {
   763373: "0x0BEb9438A24d119d600158F2CB829F461f5eFf5C", // Ink Sepolia
-  84532: null, // Base Sepolia — deploy pending
+  84532: "0xe584C914413457cd7b6a310a17A449135415F1c3", // Base Sepolia
 };
 
 export const CHAIN_EXPLORERS: Record<number, string> = {
