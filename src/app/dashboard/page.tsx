@@ -236,11 +236,12 @@ export default function DashboardPage() {
     setIsLoadingOwned(true);
 
     const fetchPaginatedLogs = async () => {
-      const CHUNK = BigInt(99000);
+      // Base Sepolia RPC caps getLogs at 10,000 blocks per request
+      const CHUNK = chainId === 84532 ? BigInt(9999) : BigInt(99000);
       const latest = await publicClient.getBlockNumber();
       const startBlock = chainId === 763373
-        ? BigInt(46850539)
-        : (latest > BigInt(1000000) ? latest - BigInt(1000000) : BigInt(0));
+        ? BigInt(46850539)   // Ink Sepolia factory deployment block
+        : BigInt(39200000);  // Base Sepolia factory deployment block (~Apr 2025)
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const allLogs: any[] = [];
