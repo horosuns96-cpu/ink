@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useChainId, useSwitchChain, useWatchAsset } from 'wagmi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Rocket, Loader2, CheckCircle, Globe, ExternalLink, ShieldCheck, Sparkles, Wallet } from 'lucide-react';
@@ -14,11 +14,13 @@ import Link from 'next/link';
 
 const BASED_NAMES = [
   'Based Pepe', 'Ink Master', 'Blue Chip Gem', 'Superchain Hero',
-  'Onchain Legend', 'Ink Protocol', 'Based Builder', 'Chain Surfer',
+  'Onchain Legend', 'Based Builder', 'Chain Surfer',
   'Ink Wizard', 'Base Degen', 'Superchain Star', 'Ink Punk',
   'Based OG', 'Chain Max', 'Ink Rush', 'Base Maxi', 'Onchain Pioneer',
-  'Ink Spark', 'Layer Zero', 'Block Sage',
+  'Ink Spark', 'Layer Zero', 'Block Sage', 'Ink Rebel', 'Chain Wizard',
+  'Degen Prime', 'Onchain Ghost', 'Ink Genesis', 'Base Nomad',
 ];
+const shuffledNames = [...BASED_NAMES].sort(() => Math.random() - 0.5);
 
 // Right col preview
 function PreviewCard({ name, symbol, supply, chainId }: { name: string; symbol: string; supply: string; chainId: number }) {
@@ -75,6 +77,11 @@ export default function LaunchPage() {
   const { data: hash, isPending: isWalletLoading, writeContractAsync } = useWriteContract();
   const { isLoading: isMining, isSuccess, data: receipt } = useWaitForTransactionReceipt({ hash });
   const { watchAsset } = useWatchAsset();
+  const nameIdxRef = useRef(0);
+  const generateName = () => {
+    setName(shuffledNames[nameIdxRef.current % shuffledNames.length]);
+    nameIdxRef.current += 1;
+  };
 
   useEffect(() => {
     if (isSuccess && hash) {
@@ -171,7 +178,19 @@ export default function LaunchPage() {
              
              {deployedTokenAddress && symbol && (
                <button
-                 onClick={async () => { try { await watchAsset({ type: 'ERC20', options: { address: deployedTokenAddress, symbol, decimals: 18 } }); } catch {} }}
+                 onClick={async () => {
+                   try {
+                     await watchAsset({ type: 'ERC20', options: { address: deployedTokenAddress, symbol, decimals: 18 } });
+                     toast.success(`$${symbol} added to wallet!`);
+                   } catch (e: any) {
+                     const msg = e?.message?.toLowerCase() || '';
+                     if (msg.includes('not supported')) {
+                       toast.error('Your wallet does not support adding custom tokens on testnets.');
+                     } else {
+                       toast.error('Could not add token — try manually via contract address.');
+                     }
+                   }
+                 }}
                  className="w-full mb-4 py-4 rounded-xl bg-purple-600/20 hover:bg-purple-600/40 text-purple-300 hover:text-white font-bold border border-purple-500/30 hover:border-purple-500/60 transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.15)] hover:shadow-[0_0_30px_rgba(168,85,247,0.3)]"
                >
                  <Wallet className="w-4 h-4" /> Add ${symbol} to Wallet
@@ -225,7 +244,7 @@ export default function LaunchPage() {
                  <div>
                    <div className="flex items-center justify-between mb-2">
                      <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest">Full Asset Name</label>
-                     <button type="button" onClick={() => setName(BASED_NAMES[Math.floor(Math.random() * BASED_NAMES.length)])} className="flex items-center gap-1 text-[10px] font-bold text-purple-400/70 hover:text-purple-400 uppercase tracking-widest transition-colors">
+                     <button type="button" onClick={generateName} className="flex items-center gap-1 text-[10px] font-bold text-purple-400/70 hover:text-purple-400 uppercase tracking-widest transition-colors">
                        <Sparkles className="w-3 h-3" /> Generate
                      </button>
                    </div>
