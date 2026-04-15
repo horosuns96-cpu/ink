@@ -76,24 +76,12 @@ export default function LaunchPage() {
   const { data: hash, isPending: isWalletLoading, writeContractAsync } = useWriteContract();
   const { isLoading: isMining, isSuccess, data: receipt } = useWaitForTransactionReceipt({ hash });
   const { watchAsset } = useWatchAsset();
-  const deckRef = useRef<string[]>([]);
-  const lastShownRef = useRef('');
+  const usedRef = useRef(new Set<string>());
   const generateName = () => {
-    if (deckRef.current.length === 0) {
-      const a = [...BASED_NAMES];
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      // Ensure deck top (next to pop) ≠ last shown
-      if (a[a.length - 1] === lastShownRef.current) {
-        const swap = Math.floor(Math.random() * (a.length - 1));
-        [a[a.length - 1], a[swap]] = [a[swap], a[a.length - 1]];
-      }
-      deckRef.current = a;
-    }
-    const next = deckRef.current.pop()!;
-    lastShownRef.current = next;
+    let pool = BASED_NAMES.filter(n => !usedRef.current.has(n));
+    if (pool.length === 0) { usedRef.current.clear(); pool = BASED_NAMES; }
+    const next = pool[Math.floor(Math.random() * pool.length)];
+    usedRef.current.add(next);
     setName(next);
   };
 
