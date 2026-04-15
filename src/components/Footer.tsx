@@ -9,6 +9,14 @@ const INK_LINKS = [
   { label: 'Twitter / X', href: 'https://x.com/inkonchain' },
 ];
 
+const BASE_LINKS = [
+  { label: 'Base Website', href: 'https://base.org' },
+  { label: 'BaseScan', href: 'https://sepolia.basescan.org' },
+  { label: 'Base Faucet', href: 'https://faucet.quicknode.com/base/sepolia' },
+  { label: 'Base Docs', href: 'https://docs.base.org' },
+  { label: 'Twitter / X', href: 'https://x.com/base' },
+];
+
 const APP_LINKS = [
   { label: 'Launch Token', href: '/launch' },
   { label: 'Dashboard', href: '/dashboard' },
@@ -19,7 +27,7 @@ export function Footer() {
   return (
     <footer className="relative z-10 border-t border-white/5 mt-8 py-12 px-4 sm:px-6">
       <div className="max-w-[1600px] mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-10">
 
           {/* Brand */}
           <div>
@@ -30,11 +38,17 @@ export function Footer() {
               <span className="font-bold text-white tracking-tight">InkLaunch</span>
             </div>
             <p className="text-xs text-white/40 leading-relaxed max-w-[200px]">
-              No-code ERC-20 token deployment on Ink Sepolia. Built for builders.
+              Multichain no-code ERC-20 factory. Ink Sepolia &amp; Base Sepolia. Built for builders.
             </p>
-            <div className="mt-4 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-purple-500/20 bg-purple-500/5">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#10b981]" />
-              <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">Ink Sepolia</span>
+            <div className="mt-4 flex flex-col gap-1.5">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-purple-500/20 bg-purple-500/5">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#10b981]" />
+                <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">Ink Sepolia</span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-blue-500/20 bg-blue-500/5">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_6px_#60a5fa]" />
+                <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">Base Sepolia</span>
+              </div>
             </div>
           </div>
 
@@ -69,12 +83,21 @@ export function Footer() {
             <ul className="space-y-2.5">
               {INK_LINKS.map(({ label, href }) => (
                 <li key={label}>
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-sm text-white/50 hover:text-cyan-400 transition-colors"
-                  >
+                  <a href={href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm text-white/50 hover:text-purple-400 transition-colors">
+                    {label} <ExternalLink className="w-3 h-3 opacity-50" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Base ecosystem links */}
+          <div>
+            <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-4">Base Ecosystem</p>
+            <ul className="space-y-2.5">
+              {BASE_LINKS.map(({ label, href }) => (
+                <li key={label}>
+                  <a href={href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm text-white/50 hover:text-blue-400 transition-colors">
                     {label} <ExternalLink className="w-3 h-3 opacity-50" />
                   </a>
                 </li>

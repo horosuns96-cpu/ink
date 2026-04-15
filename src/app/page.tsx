@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { motion, type Variants } from 'framer-motion';
 import { Rocket, Shield, Layers, Code2, Globe } from 'lucide-react';
 import { useReadContract } from 'wagmi';
-import { INK_FACTORY_ABI, INK_FACTORY_ADDRESS } from '@/lib/contracts';
+import { INK_FACTORY_ABI, FACTORY_ADDRESSES } from '@/lib/contracts';
 import { IntroSequence } from '@/components/IntroSequence';
 
 const STAGGER_VARIANTS: Variants = {
@@ -25,14 +25,25 @@ const ITEM_VARIANTS: Variants = {
 };
 
 export default function LandingPage() {
-  const { data: deployedTokens } = useReadContract({
-    address: INK_FACTORY_ADDRESS,
+  const { data: inkTokens } = useReadContract({
+    address: FACTORY_ADDRESSES[763373] as `0x${string}`,
     abi: INK_FACTORY_ABI,
     functionName: 'getDeployedTokens',
+    chainId: 763373,
     query: { staleTime: 30_000 },
   });
 
-  const tokenCount = deployedTokens ? (deployedTokens as string[]).length : 0;
+  const { data: baseTokens } = useReadContract({
+    address: FACTORY_ADDRESSES[84532] as `0x${string}`,
+    abi: INK_FACTORY_ABI,
+    functionName: 'getDeployedTokens',
+    chainId: 84532,
+    query: { staleTime: 30_000 },
+  });
+
+  const inkCount = inkTokens ? (inkTokens as string[]).length : 0;
+  const baseCount = baseTokens ? (baseTokens as string[]).length : 0;
+  const tokenCount = inkCount + baseCount;
 
   return (
     <div className="relative pt-32 pb-24 px-4 sm:px-6">
@@ -49,7 +60,7 @@ export default function LandingPage() {
           >
             <motion.div variants={ITEM_VARIANTS} className="px-4 py-1.5 rounded-full border border-purple-500/20 bg-purple-500/10 text-xs font-medium text-purple-400 tracking-tight flex items-center gap-2 transform-gpu shadow-[0_0_15px_rgba(168,85,247,0.1)]">
               <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_#06B6D4] animate-pulse" />
-              Ink Sepolia Alpha
+              Multichain Alpha · Ink &amp; Base
             </motion.div>
             
             <motion.h1
@@ -61,7 +72,7 @@ export default function LandingPage() {
             </motion.h1>
 
             <motion.p variants={ITEM_VARIANTS} className="text-lg text-white/60 max-w-xl font-medium tracking-tight transform-gpu">
-              InkLaunch provides an enterprise-grade compiler to launch your smart contracts on Ink. Focus on your product, not the boilerplate.
+              InkLaunch provides an enterprise-grade compiler to launch your smart contracts on Ink and Base. Focus on your product, not the boilerplate.
             </motion.p>
 
             <motion.div variants={ITEM_VARIANTS} className="flex items-center gap-4 pt-4 transform-gpu">
@@ -88,9 +99,10 @@ export default function LandingPage() {
                <div className="space-y-2 relative z-10">
                  <h3 className="text-5xl font-medium tracking-tighter text-white">{tokenCount}</h3>
                  <p className="text-cyan-400 font-bold uppercase tracking-widest text-[10px]">Contracts Mined</p>
+               <p className="text-white/30 text-[10px] font-mono mt-1">Ink: {inkCount} · Base: {baseCount}</p>
                </div>
                <div className="mt-12 relative z-10">
-                 <p className="text-xl font-medium tracking-tight text-white max-w-sm">Tap into the Ink ecosystem with a single click. Instant distribution.</p>
+                 <p className="text-xl font-medium tracking-tight text-white max-w-sm">Tap into the Ink and Base ecosystems with a single click. Instant distribution.</p>
                </div>
             </div>
 
@@ -131,9 +143,6 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="mt-40 text-center pb-8 opacity-40 text-[10px] font-bold tracking-widest uppercase font-mono text-purple-400">
-        InkLaunch &copy; 2026. Made for Ink Nebula.
-      </footer>
     </div>
   );
 }

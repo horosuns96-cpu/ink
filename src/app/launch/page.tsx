@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useChainId, useSwitchChain } from 'wagmi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Rocket, Loader2, CheckCircle, Globe, ExternalLink, ShieldCheck } from 'lucide-react';
-import { parseEther } from 'viem';
+import { parseEther, decodeEventLog } from 'viem';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import confetti from 'canvas-confetti';
 import { toast } from 'sonner';
@@ -65,7 +65,7 @@ export default function LaunchPage() {
   const { refetchBalance } = useGlobalBalance();
 
   const { data: hash, isPending: isWalletLoading, writeContractAsync } = useWriteContract();
-  const { isLoading: isMining, isSuccess } = useWaitForTransactionReceipt({ hash });
+  const { isLoading: isMining, isSuccess, data: receipt } = useWaitForTransactionReceipt({ hash });
 
   useEffect(() => {
     if (isSuccess && hash) {
@@ -86,6 +86,18 @@ export default function LaunchPage() {
   const explorerUrl = getExplorerUrl(chainId);
   const isWrongChain = isConnected && !(SUPPORTED_CHAIN_IDS as readonly number[]).includes(chainId);
   const isWorking = isWalletLoading || isMining;
+
+  const deployedTokenAddress = (() => {
+    if (!receipt || !factoryAddress) return null;
+    for (const log of receipt.logs) {
+      if (log.address.toLowerCase() !== factoryAddress.toLowerCase()) continue;
+      try {
+        const decoded = decodeEventLog({ abi: INK_FACTORY_ABI, data: log.data, topics: log.topics });
+        if (decoded.eventName === 'TokenCreated') return (decoded.args as { tokenAddress: string }).tokenAddress;
+      } catch {}
+    }
+    return null;
+  })();
 
   const handleDeploy = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,15 +150,42 @@ export default function LaunchPage() {
                 <CheckCircle className="w-10 h-10 text-cyan-400" />
              </div>
              <h2 className="text-3xl font-medium text-white tracking-tight mb-2">Block Mined Successfully</h2>
-             <p className="text-white/50 mb-8">Asset {name} (${symbol}) is permanently active on the network.</p>
+             <p className="text-white/50 mb-8">Asset {name} ({symbol}) is permanently active on {chainId === 84532 ? 'Base Sepolia' : 'Ink Sepolia'}.</p>
+
+             {deployedTokenAddress && (
+               <div className="w-full mb-6 px-4 py-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3">
+                 <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest shrink-0">Token</span>
+                 <span className="font-mono text-xs text-white/70 truncate">{deployedTokenAddress}</span>
+                 <button onClick={() => { navigator.clipboard.writeText(deployedTokenAddress); toast.success('Copied!'); }} className="shrink-0 text-white/30 hover:text-white transition-colors text-xs font-bold">Copy</button>
+               </div>
+             )}
              
-             <div className="flex flex-col sm:flex-row gap-4 w-full">
+             <div className="flex flex-col sm:flex-row gap-4 w-full mb-4">
                <button onClick={() => { setDeployedHash(null); setName(''); setSymbol(''); }} className="flex-1 py-4 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold tracking-tight border border-white/10 transition-colors">
                  Build New
                </button>
                <a href={`${explorerUrl}/tx/${deployedHash}`} target="_blank" className="flex-1 py-4 rounded-xl bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-400 font-bold tracking-tight border border-cyan-500/30 transition-colors flex items-center justify-center gap-2">
                  Block Explorer <ExternalLink className="w-4 h-4" />
                </a>
+             </div>
+
+             <div className="flex flex-col sm:flex-row gap-3 w-full">
+               <a
+                 href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`🚀 Just deployed $${symbol} (${name}) on ${chainId === 84532 ? 'Base' : 'Ink'} via InkLaunch!\n\nhttps://inklaunch.vercel.app`)}`}
+                 target="_blank" rel="noopener noreferrer"
+                 className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-[#1d9bf0]/20 text-white/60 hover:text-[#1d9bf0] font-bold text-sm border border-white/10 hover:border-[#1d9bf0]/30 transition-all flex items-center justify-center gap-2"
+               >
+                 Share on X
+               </a>
+               {deployedTokenAddress && (
+                 <a
+                   href={`https://app.uniswap.org/#/add/ETH/${deployedTokenAddress}`}
+                   target="_blank" rel="noopener noreferrer"
+                   className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-pink-500/20 text-white/60 hover:text-pink-400 font-bold text-sm border border-white/10 hover:border-pink-500/30 transition-all flex items-center justify-center gap-2"
+                 >
+                   Add Liquidity <ExternalLink className="w-3.5 h-3.5" />
+                 </a>
+               )}
              </div>
           </motion.div>
         ) : (
