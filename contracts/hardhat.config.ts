@@ -7,8 +7,12 @@ dotenv.config();
 const config: HardhatUserConfig = {
   solidity: "0.8.20",
   networks: {
-    inkSepia: {
+    inkSepolia: {
       url: "https://rpc-gel-sepolia.inkonchain.com",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+    },
+    baseSepolia: {
+      url: "https://sepolia.base.org",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     },
   },

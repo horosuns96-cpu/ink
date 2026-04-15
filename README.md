@@ -2,18 +2,29 @@
 
 # 🚀 InkLaunch Protocol
 
-**One-click ERC-20 token deployment on Ink Sepolia**
+**Multichain no-code ERC-20 token factory — Ink Sepolia & Base Sepolia**
 
 [![Testnet](https://img.shields.io/badge/network-Ink%20Sepolia-7F77DD?style=flat-square)](https://explorer-sepolia.inkonchain.com)
+[![Base](https://img.shields.io/badge/network-Base%20Sepolia-0052FF?style=flat-square)](https://sepolia.basescan.org)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)](https://nextjs.org)
 [![License](https://img.shields.io/badge/license-MIT-1D9E75?style=flat-square)](LICENSE)
 [![WalletConnect](https://img.shields.io/badge/RainbowKit-v2-7F77DD?style=flat-square)](https://www.rainbowkit.com)
 
 Connect your wallet → configure your token → deploy. No Solidity knowledge required.
 
-[**Live Demo**](https://inklaunch.vercel.app) · [**Ink Explorer**](https://explorer-sepolia.inkonchain.com) · [**Get Testnet ETH**](https://faucet.inkonchain.com)
+[**Live Demo**](https://inklaunch.vercel.app) · [**Ink Explorer**](https://explorer-sepolia.inkonchain.com) · [**Base Explorer**](https://sepolia.basescan.org) · [**Get Testnet ETH**](https://inkonchain.com/faucet)
 
 </div>
+
+---
+
+## 🌐 Multichain Support
+
+| Network | Chain ID | Factory Contract | Status |
+|---|---|---|---|
+| **Ink Sepolia** | 763373 | [`0x0BEb9438...`](https://explorer-sepolia.inkonchain.com/address/0x0BEb9438A24d119d600158F2CB829F461f5eFf5C) | ✅ Live + Verified |
+| **Base Sepolia** | 84532 | deploy pending | 🔜 Coming Soon |
+| **Base Mainnet** | 8453 | — | 📋 Planned |
 
 ---
 

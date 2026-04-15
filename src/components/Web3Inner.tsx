@@ -13,6 +13,7 @@ import {
 import { WagmiProvider, useAccount, useDisconnect } from 'wagmi';
 import { QueryClientProvider, QueryClient, useQueryClient } from '@tanstack/react-query';
 import { defineChain } from 'viem';
+import { baseSepolia } from 'viem/chains';
 import { Loader2 } from 'lucide-react';
 import { BalanceProvider } from './BalanceProvider';
 import { watchAccount } from '@wagmi/core';
@@ -41,10 +42,10 @@ const getAppUrl = () => {
 export const config = getDefaultConfig({
   appName: 'InkLaunch Protocol',
   projectId: 'e6e6a80c62bfd3d095c47aaa8b2e439e',
-  chains: [inkSepolia],
+  chains: [inkSepolia, baseSepolia],
   ssr: false,
   multiInjectedProviderDiscovery: false,
-  appDescription: 'InkLaunch is the fastest way to deploy ERC-20 tokens on Ink Sepolia.',
+  appDescription: 'InkLaunch is a multichain no-code ERC-20 token factory. Supports Ink Sepolia and Base Sepolia.',
   appUrl: getAppUrl(),
   appIcon: 'https://inkonchain.com/favicon.ico',
   wallets: [

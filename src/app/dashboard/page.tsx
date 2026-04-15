@@ -3,15 +3,13 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useAccount, useReadContract, useReadContracts, useWatchAsset, useSwitchChain, useChainId, usePublicClient } from 'wagmi';
 import { parseAbiItem } from 'viem';
-import { INK_FACTORY_ABI, INK_FACTORY_ADDRESS } from '@/lib/contracts';
+import { INK_FACTORY_ABI, INK_FACTORY_ADDRESS, getFactoryAddress, getExplorerUrl, SUPPORTED_CHAIN_IDS } from '@/lib/contracts';
 import { formatEther } from 'viem';
 import { useGlobalBalance } from '@/components/BalanceProvider';
 import { Rocket, ExternalLink, Copy, CheckCircle, Coins, LayoutDashboard, Plus, Loader2, Package, Wallet, Search, ArrowDownAZ, ArrowUpAZ, Clock, TrendingDown, TrendingUp, Star } from 'lucide-react';
 import Link from 'next/link';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { toast } from 'sonner';
-
-const INK_SEPOLIA_CHAIN_ID = 763373;
 
 const ERC20_BALANCE_OF_ABI = [
   { inputs: [{ name: 'account', type: 'address' }], name: 'balanceOf', outputs: [{ name: '', type: 'uint256' }], stateMutability: 'view', type: 'function' },
@@ -29,7 +27,7 @@ interface TokenData {
   balance?: bigint;
 }
 
-const TokenCard = React.memo(function TokenCard({ tokenAddress, tokenData, index }: { tokenAddress: string; tokenData: TokenData; index: number }) {
+const TokenCard = React.memo(function TokenCard({ tokenAddress, tokenData, index, explorerUrl }: { tokenAddress: string; tokenData: TokenData; index: number; explorerUrl: string }) {
   const [copied, setCopied] = useState(false);
   const { watchAsset } = useWatchAsset();
 
@@ -113,7 +111,7 @@ const TokenCard = React.memo(function TokenCard({ tokenAddress, tokenData, index
           <Wallet className="w-4 h-4" />
         </button>
         <a
-          href={`https://explorer-sepolia.inkonchain.com/token/${tokenAddress}`}
+          href={`${explorerUrl}/token/${tokenAddress}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex justify-center items-center px-3 py-2.5 rounded-xl bg-black/40 hover:bg-cyan-500/10 hover:text-cyan-400 hover:border-cyan-500/20 border border-white/5 transition-colors text-white/60 active:scale-95"
@@ -148,11 +146,15 @@ export default function DashboardPage() {
   const { switchChainAsync } = useSwitchChain();
   const { balanceFormatted } = useGlobalBalance();
 
+  const factoryAddress = getFactoryAddress(chainId);
+  const explorerUrl = getExplorerUrl(chainId);
+  const isOnSupportedChain = (SUPPORTED_CHAIN_IDS as readonly number[]).includes(chainId);
+
   const { data: allTokens, isLoading } = useReadContract({
-    address: INK_FACTORY_ADDRESS,
+    address: factoryAddress ?? INK_FACTORY_ADDRESS,
     abi: INK_FACTORY_ABI,
     functionName: 'getDeployedTokens',
-    query: { staleTime: 120_000 }
+    query: { staleTime: 120_000, enabled: !!factoryAddress }
   });
 
   const [myTokenAddresses, setMyTokenAddresses] = useState<string[]>([]);
@@ -229,11 +231,13 @@ export default function DashboardPage() {
     }
     let cancelled = false;
 
+    const logAddress = getFactoryAddress(chainId) ?? INK_FACTORY_ADDRESS;
+    const fromBlock = chainId === 763373 ? BigInt(46850539) : BigInt(0);
     setIsLoadingOwned(true);
     publicClient.getLogs({
-      address: INK_FACTORY_ADDRESS,
+      address: logAddress,
       event: parseAbiItem('event TokenCreated(address indexed tokenAddress, string name, string symbol, uint256 initialSupply, address owner)'),
-      fromBlock: BigInt(46850539),
+      fromBlock,
     })
     .then(logs => {
       if (cancelled) return;
@@ -252,7 +256,7 @@ export default function DashboardPage() {
     });
 
     return () => { cancelled = true; };
-  }, [address, publicClient]);
+  }, [address, publicClient, chainId]);
 
   if (isReconnecting) return null;
 
@@ -293,9 +297,9 @@ export default function DashboardPage() {
                 { label: 'Deployed Contracts', value: `${totalCount} Total`, sub: isLoadingOwned ? 'Scanning events...' : myTokenAddresses.length > 0 ? `${myTokenAddresses.length} deployed by you` : 'None deployed yet', icon: <Package className="w-4 h-4 text-purple-400" /> },
                 {
                   label: 'RPC Link',
-                  value: chainId === INK_SEPOLIA_CHAIN_ID ? 'Connected (Ink)' : 'Wrong Network',
-                  icon: <div className={`w-2 h-2 rounded-full ${chainId === INK_SEPOLIA_CHAIN_ID ? 'bg-emerald-400 shadow-[0_0_10px_#10b981]' : 'bg-red-500 animate-pulse'}`} />,
-                  action: chainId !== INK_SEPOLIA_CHAIN_ID ? () => switchChainAsync({ chainId: INK_SEPOLIA_CHAIN_ID }) : undefined,
+                  value: isOnSupportedChain ? (chainId === 763373 ? 'Ink Sepolia' : 'Base Sepolia') : 'Wrong Network',
+                  icon: <div className={`w-2 h-2 rounded-full ${isOnSupportedChain ? 'bg-emerald-400 shadow-[0_0_10px_#10b981]' : 'bg-red-500 animate-pulse'}`} />,
+                  action: !isOnSupportedChain ? () => switchChainAsync({ chainId: 763373 }) : undefined,
                 },
               ].map((stat, i) => (
                 <TiltStatCard key={i} stat={stat} />
@@ -384,7 +388,7 @@ export default function DashboardPage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
                   {displayList.map((tokenAddr, i) => (
-                    <TokenCard key={tokenAddr} tokenAddress={tokenAddr} tokenData={tokenDataMap[tokenAddr] ?? {}} index={i} />
+                    <TokenCard key={tokenAddr} tokenAddress={tokenAddr} tokenData={tokenDataMap[tokenAddr] ?? {}} index={i} explorerUrl={explorerUrl} />
                   ))}
                 </div>
               )}

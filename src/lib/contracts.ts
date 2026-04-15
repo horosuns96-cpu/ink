@@ -1,5 +1,25 @@
 export const INK_FACTORY_ADDRESS = "0x0BEb9438A24d119d600158F2CB829F461f5eFf5C";
 
+export const FACTORY_ADDRESSES: Record<number, `0x${string}` | null> = {
+  763373: "0x0BEb9438A24d119d600158F2CB829F461f5eFf5C", // Ink Sepolia
+  84532: null, // Base Sepolia — deploy pending
+};
+
+export const CHAIN_EXPLORERS: Record<number, string> = {
+  763373: 'https://explorer-sepolia.inkonchain.com',
+  84532: 'https://sepolia.basescan.org',
+};
+
+export const SUPPORTED_CHAIN_IDS = [763373, 84532] as const;
+
+export function getFactoryAddress(chainId: number): `0x${string}` | null {
+  return FACTORY_ADDRESSES[chainId] ?? null;
+}
+
+export function getExplorerUrl(chainId: number): string {
+  return CHAIN_EXPLORERS[chainId] ?? 'https://explorer-sepolia.inkonchain.com';
+}
+
 export const INK_FACTORY_ABI = [
   {
     "anonymous": false,

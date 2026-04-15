@@ -8,10 +8,9 @@ import { parseEther } from 'viem';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import confetti from 'canvas-confetti';
 import { toast } from 'sonner';
-import { INK_FACTORY_ABI, INK_FACTORY_ADDRESS } from '@/lib/contracts';
+import { INK_FACTORY_ABI, getFactoryAddress, getExplorerUrl, SUPPORTED_CHAIN_IDS } from '@/lib/contracts';
 import { useGlobalBalance } from '@/components/BalanceProvider';
 import Link from 'next/link';
-const INK_SEPOLIA_CHAIN_ID = 763373;
 
 // Right col preview
 function PreviewCard({ name, symbol, supply }: { name: string; symbol: string; supply: string }) {
@@ -82,23 +81,21 @@ export default function LaunchPage() {
     }
   }, [isSuccess, hash, refetchBalance]);
 
-  const isWrongChain = isConnected && chainId !== INK_SEPOLIA_CHAIN_ID;
+  const factoryAddress = getFactoryAddress(chainId);
+  const explorerUrl = getExplorerUrl(chainId);
+  const isWrongChain = isConnected && !(SUPPORTED_CHAIN_IDS as readonly number[]).includes(chainId);
   const isWorking = isWalletLoading || isMining;
 
   const handleDeploy = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !symbol || !supply) return;
-    if (isWrongChain) {
-      try { await switchChainAsync({ chainId: INK_SEPOLIA_CHAIN_ID }); } 
-      catch { return toast.error('Please switch to Ink Sepolia.'); }
-    }
+    if (!factoryAddress) return toast.error('Factory not deployed on this network yet.');
     try {
       await writeContractAsync({
-        address: INK_FACTORY_ADDRESS,
+        address: factoryAddress,
         abi: INK_FACTORY_ABI,
         functionName: 'createToken',
         args: [name, symbol, parseEther(supply)],
-        chainId: INK_SEPOLIA_CHAIN_ID,
       });
     } catch (e: any) {
       toast.error('Transaction Failed', { description: e.shortMessage || 'Rejected or reverted' });
@@ -123,11 +120,16 @@ export default function LaunchPage() {
         ) : isWrongChain ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-3xl border border-red-500/20 bg-red-950/20 p-16 text-center">
             <Globe className="w-12 h-12 text-red-500 mx-auto mb-6 animate-pulse" />
-            <h2 className="text-2xl font-medium text-white mb-2">Network Desync</h2>
-            <p className="text-white/50 mb-8">Move context to Ink Sepolia to continue.</p>
-            <button onClick={() => switchChainAsync({ chainId: INK_SEPOLIA_CHAIN_ID })} disabled={isSwitching} className="px-8 py-3 rounded-full bg-red-600 hover:bg-red-500 text-white font-bold transition-colors">
-              {isSwitching ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Force Sync'}
-            </button>
+            <h2 className="text-2xl font-medium text-white mb-2">Unsupported Network</h2>
+            <p className="text-white/50 mb-6">Switch to Ink Sepolia or Base Sepolia to continue.</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button onClick={() => switchChainAsync({ chainId: 763373 })} disabled={isSwitching} className="px-6 py-3 rounded-full bg-purple-600 hover:bg-purple-500 text-white font-bold transition-colors text-sm">
+                {isSwitching ? <Loader2 className="w-4 h-4 animate-spin inline" /> : 'Switch to Ink Sepolia'}
+              </button>
+              <button onClick={() => switchChainAsync({ chainId: 84532 })} disabled={isSwitching} className="px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-500 text-white font-bold transition-colors text-sm">
+                {isSwitching ? <Loader2 className="w-4 h-4 animate-spin inline" /> : 'Switch to Base Sepolia'}
+              </button>
+            </div>
           </motion.div>
         ) : deployedHash ? (
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="rounded-3xl border border-cyan-500/20 bg-neutral-900 p-12 text-center max-w-2xl mx-auto shadow-[0_0_50px_rgba(6,182,212,0.15)] flex flex-col items-center">
@@ -135,13 +137,13 @@ export default function LaunchPage() {
                 <CheckCircle className="w-10 h-10 text-cyan-400" />
              </div>
              <h2 className="text-3xl font-medium text-white tracking-tight mb-2">Block Mined Successfully</h2>
-             <p className="text-white/50 mb-8">Asset {name} (${symbol}) is permanently active on the Ink Network.</p>
+             <p className="text-white/50 mb-8">Asset {name} (${symbol}) is permanently active on the network.</p>
              
              <div className="flex flex-col sm:flex-row gap-4 w-full">
                <button onClick={() => { setDeployedHash(null); setName(''); setSymbol(''); }} className="flex-1 py-4 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold tracking-tight border border-white/10 transition-colors">
                  Build New
                </button>
-               <a href={`https://explorer-sepolia.inkonchain.com/tx/${deployedHash}`} target="_blank" className="flex-1 py-4 rounded-xl bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-400 font-bold tracking-tight border border-cyan-500/30 transition-colors flex items-center justify-center gap-2">
+               <a href={`${explorerUrl}/tx/${deployedHash}`} target="_blank" className="flex-1 py-4 rounded-xl bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-400 font-bold tracking-tight border border-cyan-500/30 transition-colors flex items-center justify-center gap-2">
                  Block Explorer <ExternalLink className="w-4 h-4" />
                </a>
              </div>
