@@ -37,8 +37,11 @@
 - **🌐 Multichain** — Native support for Ink Sepolia and Base Sepolia from a single UI
 - **📊 Command Center** — Dashboard with live token stats, ownership tracking, search and sort
 - **🔍 On-chain indexing** — Paginated `TokenCreated` event scanning to accurately track tokens you deployed across any block range
-- **📤 Token Card** — After deploy: copy contract address, share on X, open on block explorer
-- **🔗 Multi-wallet** — MetaMask, Coinbase Wallet, Rainbow, WalletConnect (QR), Safe multisig
+- **✨ Based Name Generator** — Instant name suggestions with a non-repeating deck of 25 curated crypto names
+- **� Superchain Speed Mode** — 3-step visual deploy progress: Wallet → Broadcast → Indexing
+- **💎 Add to Wallet** — One-click `wallet_watchAsset` to add your deployed token straight to MetaMask
+- **�📤 Token Card** — After deploy: copy contract address, share on X, block explorer, token explorer
+- **🔗 Multi-wallet** — MetaMask, Coinbase Wallet, Rainbow, WalletConnect (QR), Zerion, injected
 - **🔁 Chain switcher** — Switch between Ink and Base directly from the profile dropdown
 - **🛡 Session recovery** — Auto-reconnect + WalletConnect session error cleanup
 - **🌌 Immersive UI** — Dark cosmic theme · aurora gradient · animated starfield · 3D tilt cards
@@ -81,13 +84,19 @@ Live multichain token counter (Ink + Base combined), animated hero, feature bent
 
 | Wallet | Desktop | Mobile |
 |--------|---------|--------|
-| 🦊 MetaMask | ✅ Extension | ✅ WalletConnect QR |
-| 🔵 Coinbase Wallet | ✅ Extension | ✅ Deep link |
-| 🌈 Rainbow | ✅ Extension | ✅ Deep link |
-|  WalletConnect | ✅ QR | ✅ Any WC-compatible app |
-| 🔒 Safe (Gnosis) | ✅ Multisig | — |
+| 🦊 MetaMask | ✅ Extension | ✅ Best mobile option |
+| 🔵 Coinbase Wallet | ✅ Extension | ⚠️ Base Sepolia only |
+| 🌈 Rainbow | ✅ Extension | ⚠️ Base Sepolia only |
+| 🔗 WalletConnect | ✅ QR | ⚠️ Base Sepolia only |
+| ⬡ Zerion | ✅ Extension | ⚠️ Base Sepolia only |
+| � Injected | ✅ Any browser wallet | — |
 
-> **Note:** Mobile wallets require HTTPS and work on [inklaunch.vercel.app](https://inklaunch.vercel.app). `localhost` connections are HTTP-only and may not trigger wallet deeplinks.
+> **Mobile note:** Ink Sepolia (`763373`) is a custom testnet not in the WalletConnect chain registry. Mobile wallets connect to **Base Sepolia** by default. To use Ink Sepolia on mobile, add the network manually in **MetaMask Mobile**:
+> ```
+> RPC:      https://rpc-gel-sepolia.inkonchain.com
+> Chain ID: 763373  |  Symbol: ETH
+> Explorer: https://explorer-sepolia.inkonchain.com
+> ```
 
 ---
 

@@ -44,7 +44,7 @@ const getAppUrl = () => {
 
 export const config = getDefaultConfig({
   appName: 'InkLaunch Protocol',
-  projectId: 'e6e6a80c62bfd3d095c47aaa8b2e439e',
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? 'e6e6a80c62bfd3d095c47aaa8b2e439e',
   chains: [baseSepolia, inkSepolia],
   ssr: false,
   pollingInterval: 15_000,
