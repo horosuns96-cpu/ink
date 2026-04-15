@@ -45,7 +45,7 @@ const getAppUrl = () => {
 export const config = getDefaultConfig({
   appName: 'InkLaunch Protocol',
   projectId: 'e6e6a80c62bfd3d095c47aaa8b2e439e',
-  chains: [inkSepolia, baseSepolia],
+  chains: [baseSepolia, inkSepolia],
   ssr: false,
   pollingInterval: 15_000,
   multiInjectedProviderDiscovery: true,

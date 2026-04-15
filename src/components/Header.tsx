@@ -68,7 +68,16 @@ function ProfileDropdown({ address, onClose }: { address: string; onClose: () =>
         <p className="text-[10px] text-purple-400/80 uppercase tracking-widest font-black mb-1">Network</p>
         <div className="grid grid-cols-2 gap-2">
           <button
-            onClick={async () => { try { await switchChainAsync({ chainId: 763373 }); } catch { toast.error('Switch network manually in your wallet app.'); } }}
+            onClick={async () => {
+              try {
+                await switchChainAsync({ chainId: 763373 });
+              } catch {
+                toast.error('Add Ink Sepolia manually', {
+                  description: 'RPC: rpc-gel-sepolia.inkonchain.com · Chain ID: 763373',
+                  duration: 6000,
+                });
+              }
+            }}
             className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
               chainId === 763373
                 ? 'bg-purple-600/40 border border-purple-500/60 text-purple-300'
