@@ -8,10 +8,7 @@ import {
   rainbowWallet,
   injectedWallet,
   metaMaskWallet,
-  safeWallet,
-  krakenWallet,
   zerionWallet,
-  okxWallet,
 } from '@rainbow-me/rainbowkit/wallets';
 import { WagmiProvider, useAccount, useDisconnect } from 'wagmi';
 import { QueryClientProvider, QueryClient, useQueryClient } from '@tanstack/react-query';
@@ -58,11 +55,11 @@ export const config = getDefaultConfig({
   wallets: [
     {
       groupName: 'Popular',
-      wallets: [metaMaskWallet, coinbaseWallet, walletConnectWallet, rainbowWallet, krakenWallet],
+      wallets: [metaMaskWallet, coinbaseWallet, rainbowWallet, walletConnectWallet],
     },
     {
       groupName: 'More',
-      wallets: [zerionWallet, okxWallet, safeWallet, injectedWallet],
+      wallets: [zerionWallet, injectedWallet],
     },
   ],
 });
