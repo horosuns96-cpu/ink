@@ -20,7 +20,6 @@ const BASED_NAMES = [
   'Ink Spark', 'Layer Zero', 'Block Sage', 'Ink Rebel', 'Chain Wizard',
   'Degen Prime', 'Onchain Ghost', 'Ink Genesis', 'Base Nomad',
 ];
-const shuffledNames = [...BASED_NAMES].sort(() => Math.random() - 0.5);
 
 // Right col preview
 function PreviewCard({ name, symbol, supply, chainId }: { name: string; symbol: string; supply: string; chainId: number }) {
@@ -77,10 +76,12 @@ export default function LaunchPage() {
   const { data: hash, isPending: isWalletLoading, writeContractAsync } = useWriteContract();
   const { isLoading: isMining, isSuccess, data: receipt } = useWaitForTransactionReceipt({ hash });
   const { watchAsset } = useWatchAsset();
-  const nameIdxRef = useRef(0);
+  const deckRef = useRef<string[]>([]);
   const generateName = () => {
-    setName(shuffledNames[nameIdxRef.current % shuffledNames.length]);
-    nameIdxRef.current += 1;
+    if (deckRef.current.length === 0) {
+      deckRef.current = [...BASED_NAMES].sort(() => Math.random() - 0.5);
+    }
+    setName(deckRef.current.pop()!);
   };
 
   useEffect(() => {
