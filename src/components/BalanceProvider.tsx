@@ -24,12 +24,12 @@ export function BalanceProvider({ children }: { children: ReactNode }) {
     address,
     query: {
       enabled: isConnected && !!address,
-      refetchInterval: 5000,
+      refetchInterval: 3000,
     },
   });
 
   const activeBalance = isConnected && data?.formatted ? Number(data.formatted) : 0;
-  const balanceFormatted = activeBalance.toFixed(4);
+  const balanceFormatted = activeBalance.toFixed(6);
   const hasBalance = activeBalance > 0;
 
   const refetchBalance = useCallback(() => {

@@ -233,13 +233,34 @@ export default function DashboardPage() {
     let cancelled = false;
 
     const logAddress = getFactoryAddress(chainId) ?? INK_FACTORY_ADDRESS;
-    const fromBlock = chainId === 763373 ? BigInt(46850539) : BigInt(0);
     setIsLoadingOwned(true);
-    publicClient.getLogs({
-      address: logAddress,
-      event: parseAbiItem('event TokenCreated(address indexed tokenAddress, string name, string symbol, uint256 initialSupply, address owner)'),
-      fromBlock,
-    })
+
+    const fetchPaginatedLogs = async () => {
+      const CHUNK = BigInt(99000);
+      const latest = await publicClient.getBlockNumber();
+      const startBlock = chainId === 763373
+        ? BigInt(46850539)
+        : (latest > BigInt(1000000) ? latest - BigInt(1000000) : BigInt(0));
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const allLogs: any[] = [];
+      let from = startBlock;
+      while (from <= latest) {
+        if (cancelled) return allLogs;
+        const to = from + CHUNK > latest ? latest : from + CHUNK;
+        const chunk = await publicClient.getLogs({
+          address: logAddress,
+          event: parseAbiItem('event TokenCreated(address indexed tokenAddress, string name, string symbol, uint256 initialSupply, address owner)'),
+          fromBlock: from,
+          toBlock: to,
+        });
+        allLogs.push(...chunk);
+        from = to + BigInt(1);
+      }
+      return allLogs;
+    };
+
+    fetchPaginatedLogs()
     .then(logs => {
       if (cancelled) return;
       const mine = logs

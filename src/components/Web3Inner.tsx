@@ -51,14 +51,11 @@ export const config = getDefaultConfig({
   wallets: [
     {
       groupName: 'Popular',
-      // injectedWallet auto-detects MetaMask, Rabby, Brave Wallet and any other injected provider
-      wallets: [metaMaskWallet, injectedWallet, coinbaseWallet, rainbowWallet],
+      wallets: [metaMaskWallet, coinbaseWallet, walletConnectWallet, rainbowWallet],
     },
     {
       groupName: 'Other',
-      // walletConnectWallet: QR code fallback — works with ALL WC-compatible wallets
-      // safeWallet: Gnosis Safe multisig
-      wallets: [walletConnectWallet, safeWallet],
+      wallets: [injectedWallet, safeWallet],
     },
   ],
 });

@@ -13,7 +13,8 @@ import { useGlobalBalance } from '@/components/BalanceProvider';
 import Link from 'next/link';
 
 // Right col preview
-function PreviewCard({ name, symbol, supply }: { name: string; symbol: string; supply: string }) {
+function PreviewCard({ name, symbol, supply, chainId }: { name: string; symbol: string; supply: string; chainId: number }) {
+  const chainName = chainId === 763373 ? 'Ink Sepolia' : chainId === 84532 ? 'Base Sepolia' : 'Testnet';
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -43,7 +44,7 @@ function PreviewCard({ name, symbol, supply }: { name: string; symbol: string; s
          <div className="rounded-xl bg-white/5 p-4 border border-white/5">
             <div className="flex justify-between items-center mb-2">
                <span className="text-xs text-white/50 font-bold">Balance</span>
-               <span className="text-xs text-white/50 font-bold font-mono">Ink Sepolia</span>
+               <span className="text-xs text-white/50 font-bold font-mono">{chainName}</span>
             </div>
             <div className="text-xl font-medium text-white">{Number(supply || 0).toLocaleString()} <span className="text-cyan-400 text-sm font-bold uppercase">{symbol || 'TKN'}</span></div>
          </div>
@@ -152,7 +153,7 @@ export default function LaunchPage() {
           <>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10 text-center sm:text-left">
             <h1 className="text-4xl md:text-5xl font-medium tracking-tighter text-white mb-2">Token Compiler</h1>
-            <p className="text-white/50 tracking-tight">Configure parameters to generate your ERC-20 payload on Ink Sepolia.</p>
+            <p className="text-white/50 tracking-tight">Configure parameters to generate your ERC-20 payload on {chainId === 84532 ? 'Base Sepolia' : 'Ink Sepolia'}.</p>
           </motion.div>
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-5 gap-6">
             
@@ -166,16 +167,16 @@ export default function LaunchPage() {
                <form onSubmit={handleDeploy} className="space-y-6">
                  <div>
                    <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest block mb-2">Full Asset Name</label>
-                   <input type="text" value={name} onChange={e => setName(e.target.value)} required minLength={2} maxLength={50} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all" placeholder="e.g. Ink Protocol" />
+                   <input id="token-name" name="token-name" type="text" value={name} onChange={e => setName(e.target.value)} required minLength={2} maxLength={50} autoComplete="off" className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all" placeholder="e.g. Ink Protocol" />
                  </div>
                  <div className="grid grid-cols-2 gap-4">
                    <div>
                      <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest block mb-2">Ticker Symbol</label>
-                     <input type="text" value={symbol} onChange={e => setSymbol(e.target.value.replace(/[^A-Za-z]/g, '').toUpperCase())} required minLength={2} maxLength={6} pattern="[A-Z]{2,6}" style={{ textTransform: 'uppercase'}} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all font-mono" placeholder="INK" />
+                     <input id="token-symbol" name="token-symbol" type="text" value={symbol} onChange={e => setSymbol(e.target.value.replace(/[^A-Za-z]/g, '').toUpperCase())} required minLength={2} maxLength={6} pattern="[A-Z]{2,6}" style={{ textTransform: 'uppercase'}} autoComplete="off" className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all font-mono" placeholder="INK" />
                    </div>
                    <div>
                      <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest block mb-2">Initial Supply</label>
-                     <input type="number" value={supply} onChange={e => { const v = e.target.value.replace(/[^0-9]/g, ''); const n = Number(v); setSupply(n > 1_000_000_000_000 ? '1000000000000' : v); }} required min="1" max="1000000000000" onKeyDown={e => ['e','E','+','-','.'].includes(e.key) && e.preventDefault()} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-white/30 transition-all font-mono" />
+                     <input id="token-supply" name="token-supply" type="number" value={supply} onChange={e => { const v = e.target.value.replace(/[^0-9]/g, ''); const n = Number(v); setSupply(n > 1_000_000_000_000 ? '1000000000000' : v); }} required min="1" max="1000000000000" onKeyDown={e => ['e','E','+','-','.'].includes(e.key) && e.preventDefault()} autoComplete="off" className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-white/30 transition-all font-mono" />
                    </div>
                  </div>
 
@@ -183,7 +184,7 @@ export default function LaunchPage() {
                     {isWorking ? (
                       <motion.div key="loading" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="rounded-xl border border-purple-500/30 bg-purple-500/10 p-4 text-purple-400 flex items-center justify-center gap-3 overflow-hidden">
                         <Loader2 className="w-5 h-5 animate-spin" />
-                        <span className="font-bold text-sm tracking-tight">{isWalletLoading ? 'Awaiting Wallet Signature...' : 'Executing on Ink...'}</span>
+                        <span className="font-bold text-sm tracking-tight">{isWalletLoading ? 'Awaiting Wallet Signature...' : `Executing on ${chainId === 84532 ? 'Base' : 'Ink'}...`}</span>
                       </motion.div>
                     ) : (
                       <motion.button key="submit" initial={{ opacity: 0 }} animate={{ opacity: 1 }} type="submit" className="w-full rounded-xl bg-white text-black hover:bg-purple-500 hover:text-white hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] py-4 font-bold text-sm uppercase tracking-widest transition-all duration-300">
@@ -195,7 +196,7 @@ export default function LaunchPage() {
             </motion.div>
 
             {/* Right Col: Live Preview */}
-            <PreviewCard name={name} symbol={symbol} supply={supply} />
+            <PreviewCard name={name} symbol={symbol} supply={supply} chainId={chainId} />
 
           </div>
           </>
