@@ -77,11 +77,24 @@ export default function LaunchPage() {
   const { isLoading: isMining, isSuccess, data: receipt } = useWaitForTransactionReceipt({ hash });
   const { watchAsset } = useWatchAsset();
   const deckRef = useRef<string[]>([]);
+  const lastShownRef = useRef('');
   const generateName = () => {
     if (deckRef.current.length === 0) {
-      deckRef.current = [...BASED_NAMES].sort(() => Math.random() - 0.5);
+      const a = [...BASED_NAMES];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      // Ensure deck top (next to pop) ≠ last shown
+      if (a[a.length - 1] === lastShownRef.current) {
+        const swap = Math.floor(Math.random() * (a.length - 1));
+        [a[a.length - 1], a[swap]] = [a[swap], a[a.length - 1]];
+      }
+      deckRef.current = a;
     }
-    setName(deckRef.current.pop()!);
+    const next = deckRef.current.pop()!;
+    lastShownRef.current = next;
+    setName(next);
   };
 
   useEffect(() => {
