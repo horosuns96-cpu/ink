@@ -125,7 +125,7 @@ const TokenCard = React.memo(function TokenCard({ tokenAddress, tokenData, index
 });
 
 
-function TiltStatCard({ stat }: { stat: { label: string; value: string; sub?: string; icon: React.ReactNode; action?: () => void } }) {
+const TiltStatCard = React.memo(function TiltStatCard({ stat }: { stat: { label: string; value: string; sub?: string; icon: React.ReactNode; action?: () => void } }) {
   return (
     <div
       onClick={stat.action}
@@ -136,7 +136,7 @@ function TiltStatCard({ stat }: { stat: { label: string; value: string; sub?: st
       {stat.sub && <div className="text-[10px] text-white/30 mt-1">{stat.sub}</div>}
     </div>
   );
-}
+});
 
 export default function DashboardPage() {
   const [search, setSearch] = useState('');

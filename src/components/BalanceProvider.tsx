@@ -24,7 +24,7 @@ export function BalanceProvider({ children }: { children: ReactNode }) {
     address,
     query: {
       enabled: isConnected && !!address,
-      refetchInterval: 3000,
+      refetchInterval: 30_000,
     },
   });
 
