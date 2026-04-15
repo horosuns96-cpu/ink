@@ -1,91 +1,79 @@
 <div align="center">
 
-# 🚀 InkLaunch Protocol
+<img src="https://img.shields.io/badge/InkLaunch-Protocol-7F77DD?style=for-the-badge&logoColor=white" alt="InkLaunch" />
 
-**Multichain no-code ERC-20 token factory — Ink Sepolia & Base Sepolia**
+# InkLaunch Protocol
 
-[![Testnet](https://img.shields.io/badge/network-Ink%20Sepolia-7F77DD?style=flat-square)](https://explorer-sepolia.inkonchain.com)
-[![Base](https://img.shields.io/badge/network-Base%20Sepolia-0052FF?style=flat-square)](https://sepolia.basescan.org)
+**Multichain no-code ERC-20 token factory**
+
+[![Ink Sepolia](https://img.shields.io/badge/Ink%20Sepolia-Live-7F77DD?style=flat-square&logo=ethereum&logoColor=white)](https://explorer-sepolia.inkonchain.com)
+[![Base Sepolia](https://img.shields.io/badge/Base%20Sepolia-Live-0052FF?style=flat-square&logo=coinbase&logoColor=white)](https://sepolia.basescan.org)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)](https://nextjs.org)
-[![License](https://img.shields.io/badge/license-MIT-1D9E75?style=flat-square)](LICENSE)
-[![WalletConnect](https://img.shields.io/badge/RainbowKit-v2-7F77DD?style=flat-square)](https://www.rainbowkit.com)
+[![wagmi](https://img.shields.io/badge/wagmi-v2-1C1C1C?style=flat-square)](https://wagmi.sh)
+[![License](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)](LICENSE)
 
-Connect your wallet → configure your token → deploy. No Solidity knowledge required.
+> Connect your wallet → configure your token → deploy in seconds.  
+> No Solidity knowledge required.
 
-[**Live Demo**](https://inklaunch.vercel.app) · [**Ink Explorer**](https://explorer-sepolia.inkonchain.com) · [**Base Explorer**](https://sepolia.basescan.org) · [**Get Testnet ETH**](https://inkonchain.com/faucet)
+[**🌐 Live App**](https://inklaunch.vercel.app) · [**Ink Explorer**](https://explorer-sepolia.inkonchain.com) · [**Base Explorer**](https://sepolia.basescan.org) · [**Get Testnet ETH**](https://inkonchain.com/faucet)
 
 </div>
 
 ---
 
-## 🌐 Multichain Support
+## 🌐 Deployed Contracts
 
-| Network | Chain ID | Factory Contract | Status |
-|---|---|---|---|
-| **Ink Sepolia** | 763373 | [`0x0BEb9438...`](https://explorer-sepolia.inkonchain.com/address/0x0BEb9438A24d119d600158F2CB829F461f5eFf5C) | ✅ Live + Verified |
-| **Base Sepolia** | 84532 | [`0xe584C914...`](https://sepolia.basescan.org/address/0xe584C914413457cd7b6a310a17A449135415F1c3) | ✅ Live |
-| **Base Mainnet** | 8453 | — | 📋 Planned |
+| Network | Chain ID | Factory Address | Explorer |
+|---------|----------|-----------------|---------|
+| **Ink Sepolia** | `763373` | `0x0BEb9438A24d119d600158F2CB829F461f5eFf5C` | [View ↗](https://explorer-sepolia.inkonchain.com/address/0x0BEb9438A24d119d600158F2CB829F461f5eFf5C) |
+| **Base Sepolia** | `84532` | `0xe584C914413457cd7b6a310a17A449135415F1c3` | [View ↗](https://sepolia.basescan.org/address/0xe584C914413457cd7b6a310a17A449135415F1c3) |
+| **Base Mainnet** | `8453` | — | Planned |
 
 ---
 
 ## ✨ Features
 
-| | |
-|---|---|
-| ⚡ **One-click deploy** | Deploy a fully functional ERC-20 token in seconds via audited factory contract |
-| 📊 **Command Center** | Dashboard with all deployed tokens, ownership tracking, search & sort |
-| 🔗 **Multi-wallet** | MetaMask, Coinbase, Rainbow, Trust Wallet, WalletConnect QR and more |
-| ⚠️ **Wallet note** | Recommended: MetaMask or Coinbase Wallet browser extension. Mobile wallets may not support Ink Sepolia yet. |
-| 🌌 **Space UI** | Dark cosmic theme · aurora effects · starfield background · 3D tilt cards · cursor trail |
-| 🛡 **Session recovery** | Auto-reconnect with WalletConnect session error handling & cleanup |
-| 🔍 **On-chain indexing** | Reads `TokenCreated` events to accurately track tokens you deployed |
+- **⚡ One-click deploy** — Launch a fully compliant ERC-20 in seconds via an audited factory contract
+- **🌐 Multichain** — Native support for Ink Sepolia and Base Sepolia from a single UI
+- **📊 Command Center** — Dashboard with live token stats, ownership tracking, search and sort
+- **🔍 On-chain indexing** — Paginated `TokenCreated` event scanning to accurately track tokens you deployed across any block range
+- **📤 Token Card** — After deploy: copy contract address, share on X, open on block explorer
+- **🔗 Multi-wallet** — MetaMask, Coinbase Wallet, Rainbow, WalletConnect (QR), Safe multisig
+- **🔁 Chain switcher** — Switch between Ink and Base directly from the profile dropdown
+- **🛡 Session recovery** — Auto-reconnect + WalletConnect session error cleanup
+- **🌌 Immersive UI** — Dark cosmic theme · aurora gradient · animated starfield · 3D tilt cards
 
 ---
 
 ## 🖥 Pages
 
 ### `/` — Landing
-Animated hero with starfield, aurora gradient, feature highlights and CTA to launch.
+Live multichain token counter (Ink + Base combined), animated hero, feature bento grid.
 
-### `/launch` — Deploy Token
-Form to set token name, symbol, and initial supply. Deploys via factory contract with live tx feedback.
+### `/launch` — Token Compiler
+- Name, symbol (A–Z only, 2–6 chars), initial supply with overflow guard
+- Live preview card that reflects the connected network
+- Post-deploy: contract address · Block Explorer · Share on X · Token Explorer
 
 ### `/dashboard` — Command Center
-- Stats: ETH balance · total contracts · your contracts · network status
-- Grid of all tokens deployed via factory
-- Ownership via `TokenCreated` event filtering (accurate even after transferring tokens)
-- Search by address · sort newest/oldest · copy address · add to wallet · open explorer
+- Stats: ETH balance · total tokens · your tokens · network status
+- Search by address · sort by newest / oldest / **mine** (your deployed tokens)
+- Copy address · Add to wallet (MetaMask) · Open on explorer
+- Ownership tracked via `TokenCreated` event logs (chain-aware, paginated)
 
 ---
 
 ## 🛠 Tech Stack
 
-**Frontend**
-- [Next.js 14](https://nextjs.org) (App Router)
-- [TypeScript](https://www.typescriptlang.org)
-- [Tailwind CSS](https://tailwindcss.com)
-- [Framer Motion](https://www.framer.com/motion/)
-
-**Web3**
-- [wagmi v2](https://wagmi.sh)
-- [viem](https://viem.sh)
-- [RainbowKit](https://www.rainbowkit.com)
-- [@tanstack/react-query](https://tanstack.com/query)
-
-**Network**
-- [Ink Sepolia](https://inkonchain.com) — Chain ID `763373`
-
----
-
-## 🌐 Network Config
-
-```
-Network:  Ink Sepolia (Testnet)
-Chain ID: 763373
-RPC:      https://rpc-gel-sepolia.inkonchain.com
-Explorer: https://explorer-sepolia.inkonchain.com
-Faucet:   https://faucet.inkonchain.com
-```
+| Layer | Tech |
+|-------|------|
+| Framework | [Next.js 14](https://nextjs.org) (App Router, `'use client'`) |
+| Language | TypeScript |
+| Styling | Tailwind CSS + Framer Motion |
+| Web3 | [wagmi v2](https://wagmi.sh) + [viem](https://viem.sh) |
+| Wallet UI | [RainbowKit v2](https://www.rainbowkit.com) |
+| Data fetching | [@tanstack/react-query v5](https://tanstack.com/query) |
+| Contracts | Hardhat · Solidity 0.8.20 |
 
 ---
 
@@ -94,13 +82,32 @@ Faucet:   https://faucet.inkonchain.com
 | Wallet | Desktop | Mobile |
 |--------|---------|--------|
 | 🦊 MetaMask | ✅ Extension | ✅ WalletConnect QR |
-| 🔵 Coinbase Wallet | ✅ Extension | ✅ WalletConnect QR |
+| 🔵 Coinbase Wallet | ✅ Extension | ✅ Deep link |
 | 🌈 Rainbow | ✅ Extension | ✅ Deep link |
-| 🛡 Trust Wallet | — | ✅ Deep link / WC QR |
-| 🔗 WalletConnect | ✅ QR fallback | ✅ Any WC-compatible |
+|  WalletConnect | ✅ QR | ✅ Any WC-compatible app |
 | 🔒 Safe (Gnosis) | ✅ Multisig | — |
 
-> **Note:** Mobile wallets require HTTPS. They work on the deployed version but not on `http://localhost`.
+> **Note:** Mobile wallets require HTTPS and work on [inklaunch.vercel.app](https://inklaunch.vercel.app). `localhost` connections are HTTP-only and may not trigger wallet deeplinks.
+
+---
+
+## 🌐 Network Configuration
+
+**Ink Sepolia**
+```
+Chain ID: 763373
+RPC:      https://rpc-gel-sepolia.inkonchain.com
+Explorer: https://explorer-sepolia.inkonchain.com
+Faucet:   https://inkonchain.com/faucet
+```
+
+**Base Sepolia**
+```
+Chain ID: 84532
+RPC:      https://sepolia.base.org
+Explorer: https://sepolia.basescan.org
+Faucet:   https://faucet.quicknode.com/base/sepolia
+```
 
 ---
 
@@ -108,10 +115,10 @@ Faucet:   https://faucet.inkonchain.com
 
 ```bash
 # 1. Clone
-git clone https://github.com/horosuns96-gpu
-cd inklaunch
+git clone https://github.com/horosuns96-cpu/ink.git
+cd ink
 
-# 2. Install
+# 2. Install dependencies
 npm install
 
 # 3. Configure environment
@@ -123,10 +130,10 @@ Edit `.env.local`:
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id_here
 ```
 
-> Get your free Project ID at [cloud.walletconnect.com](https://cloud.walletconnect.com)
+> Get a free Project ID at [cloud.walletconnect.com](https://cloud.walletconnect.com)
 
 ```bash
-# 4. Run
+# 4. Start development server
 npm run dev
 ```
 
@@ -136,31 +143,38 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ## ☁️ Deploy to Vercel
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/inklaunch)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/horosuns96-cpu/ink)
 
-1. Import repo on [vercel.com](https://vercel.com)
-2. Add environment variable:
+1. Import the repo on [vercel.com](https://vercel.com)
+2. Add the environment variable:
    ```
    NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID = your_id_here
    ```
-3. Deploy — Vercel auto-detects Next.js, no config needed
+3. Deploy — Vercel auto-detects Next.js, no extra config needed
 
 ---
 
 ## 📁 Project Structure
 
 ```
-inklaunch/
-├── app/
-│   ├── page.tsx              # Landing page
-│   ├── launch/page.tsx       # Token deploy form
-│   └── dashboard/page.tsx    # Command center
-├── components/
-│   ├── Web3Inner.tsx         # wagmi + RainbowKit config
-│   ├── BalanceProvider.tsx   # Global ETH balance context
-│   └── ...
-├── lib/
-│   └── contracts.ts          # Factory ABI + address
+ink/
+├── src/
+│   ├── app/
+│   │   ├── page.tsx              # Landing — hero + bento grid + live stats
+│   │   ├── launch/page.tsx       # Token deploy form + live preview
+│   │   └── dashboard/page.tsx    # Command center — all tokens + mine filter
+│   ├── components/
+│   │   ├── Web3Inner.tsx         # wagmi + RainbowKit config
+│   │   ├── Header.tsx            # Nav + profile dropdown + chain switcher
+│   │   ├── Footer.tsx            # Multichain ecosystem links
+│   │   ├── BalanceProvider.tsx   # Global ETH balance context
+│   │   └── IntroSequence.tsx     # Animated intro overlay
+│   └── lib/
+│       └── contracts.ts          # Factory ABI + multichain address map
+├── contracts/
+│   ├── contracts/InkFactory.sol  # ERC-20 factory contract (Solidity 0.8.20)
+│   ├── scripts/deploy.ts         # Hardhat deploy script
+│   └── hardhat.config.ts         # Ink Sepolia + Base Sepolia networks
 └── .env.example
 ```
 
@@ -170,18 +184,18 @@ inklaunch/
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | ✅ Yes | From [cloud.walletconnect.com](https://cloud.walletconnect.com) |
+| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | ✅ | From [cloud.walletconnect.com](https://cloud.walletconnect.com) |
 
 ---
 
 ## 📜 License
 
-MIT — feel free to fork and build on top.
+MIT — free to fork, extend, and build on top.
 
 ---
 
 <div align="center">
 
-Built for the **Ink Sepolia** ecosystem · Powered by RainbowKit + wagmi + viem
+Built for the **Ink** and **Base** ecosystems · Powered by RainbowKit + wagmi + viem
 
 </div>
