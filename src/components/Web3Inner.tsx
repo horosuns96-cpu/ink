@@ -161,7 +161,7 @@ export function Web3Inner({ children }: { children: ReactNode }) {
   }));
 
   useEffect(() => { setMounted(true); }, []);
-  if (!mounted) return <>{children}</>;
+  if (!mounted) return null;
 
   return (
     <WagmiProvider config={config}>
