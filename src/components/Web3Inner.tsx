@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, type ReactNode } from 'react';
+import { useState, useEffect, useRef, type ReactNode } from 'react';
 import { RainbowKitProvider, getDefaultConfig, darkTheme } from '@rainbow-me/rainbowkit';
 import {
   coinbaseWallet,
@@ -155,9 +155,13 @@ function SessionManager() {
 }
 
 export function Web3Inner({ children }: { children: ReactNode }) {
+  const [mounted, setMounted] = useState(false);
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 1 } },
   }));
+
+  useEffect(() => { setMounted(true); }, []);
+  if (!mounted) return <>{children}</>;
 
   return (
     <WagmiProvider config={config}>

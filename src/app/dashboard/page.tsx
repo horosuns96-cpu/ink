@@ -175,7 +175,7 @@ export default function DashboardPage() {
       } catch {}
 
       const logAddress = getFactoryAddress(chainId) ?? INK_FACTORY_ADDRESS;
-      const CHUNK = chainId === 84532 ? BigInt(9999) : BigInt(99000);
+      const CHUNK = BigInt(5000);
       const latest = await client.getBlockNumber();
       const startBlock = chainId === 763373
         ? BigInt(46850539)
@@ -234,7 +234,7 @@ export default function DashboardPage() {
   const { data: batchData } = useReadContracts({
     contracts: batchContracts,
     multicallAddress: '0xcA11bde05977b3631167028862bE2a173976CA11',
-    query: { staleTime: 180_000, gcTime: 300_000, enabled: tokenList.length > 0 && !!address },
+    query: { staleTime: Infinity, gcTime: 600_000, enabled: tokenList.length > 0 && !!address },
   });
 
   const tokenDataMap = useMemo((): Record<string, TokenData> => {
@@ -270,7 +270,18 @@ export default function DashboardPage() {
     return tokenList;
   }, [tokenList, sortMode, tokenDataMap]);
 
-  if (isReconnecting) return null;
+  if (isReconnecting) return (
+    <div className="relative pt-24 pb-16 px-4">
+      <main className="relative z-10 w-full max-w-[1600px] mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+          {[...Array(4)].map((_, i) => <div key={i} className="h-28 rounded-3xl bg-neutral-900 border border-white/5 animate-pulse" />)}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {[...Array(8)].map((_, i) => <div key={i} className="h-52 rounded-3xl bg-neutral-900 border border-white/5 animate-pulse" />)}
+        </div>
+      </main>
+    </div>
+  );
 
   const totalCount = ((allTokens as string[] | undefined) || []).length;
 
