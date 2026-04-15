@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Copy, CheckCircle, LogOut, ExternalLink, Activity } from 'lucide-react';
-import { useAccount, useDisconnect } from 'wagmi';
+import { useAccount, useDisconnect, useChainId, useSwitchChain } from 'wagmi';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -21,6 +21,8 @@ function truncateAddress(address: string) {
 
 function ProfileDropdown({ address, onClose }: { address: string; onClose: () => void }) {
   const { disconnect } = useDisconnect();
+  const chainId = useChainId();
+  const { switchChainAsync } = useSwitchChain();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -61,6 +63,37 @@ function ProfileDropdown({ address, onClose }: { address: string; onClose: () =>
 
       <div className="h-px bg-purple-500/20" />
 
+      {/* Chain Switcher */}
+      <div className="p-3 flex flex-col gap-2">
+        <p className="text-[10px] text-purple-400/80 uppercase tracking-widest font-black mb-1">Network</p>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => switchChainAsync({ chainId: 763373 })}
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
+              chainId === 763373
+                ? 'bg-purple-600/40 border border-purple-500/60 text-purple-300'
+                : 'bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            <div className={`w-1.5 h-1.5 rounded-full ${chainId === 763373 ? 'bg-purple-400' : 'bg-white/20'}`} />
+            Ink
+          </button>
+          <button
+            onClick={() => switchChainAsync({ chainId: 84532 })}
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
+              chainId === 84532
+                ? 'bg-blue-600/40 border border-blue-500/60 text-blue-300'
+                : 'bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            <div className={`w-1.5 h-1.5 rounded-full ${chainId === 84532 ? 'bg-blue-400' : 'bg-white/20'}`} />
+            Base
+          </button>
+        </div>
+      </div>
+
+      <div className="h-px bg-purple-500/20" />
+
       <div className="p-2 flex flex-col">
         <a
           href={`https://explorer-sepolia.inkonchain.com/address/${address}`}
@@ -87,6 +120,7 @@ export function Header() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const pathname = usePathname();
   const { address, isConnected, status } = useAccount();
+  const chainId = useChainId();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -146,12 +180,24 @@ export function Header() {
               // Только при восстановлении сессии показываем placeholder
               <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/5 animate-pulse" />
             ) : isConnected && address ? (
-              <button
-                onClick={() => setIsProfileOpen(prev => !prev)}
-                className="w-9 h-9 sm:w-11 sm:h-11 rounded-full border border-purple-500/30 bg-purple-900/30 text-cyan-400 font-mono text-[10px] font-black flex items-center justify-center hover:bg-purple-900/50 hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all"
-              >
-                {address.slice(2, 4).toUpperCase()}
-              </button>
+              <div className="flex items-center gap-2">
+                <span className={`hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                  chainId === 763373 ? 'bg-purple-900/40 border-purple-500/30 text-purple-300' :
+                  chainId === 84532  ? 'bg-blue-900/40 border-blue-500/30 text-blue-300' :
+                  'bg-red-900/40 border-red-500/30 text-red-300'
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${
+                    chainId === 763373 ? 'bg-purple-400' : chainId === 84532 ? 'bg-blue-400' : 'bg-red-400 animate-pulse'
+                  }`} />
+                  {chainId === 763373 ? 'Ink' : chainId === 84532 ? 'Base' : '!'}
+                </span>
+                <button
+                  onClick={() => setIsProfileOpen(prev => !prev)}
+                  className="w-9 h-9 sm:w-11 sm:h-11 rounded-full border border-purple-500/30 bg-purple-900/30 text-cyan-400 font-mono text-[10px] font-black flex items-center justify-center hover:bg-purple-900/50 hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all"
+                >
+                  {address.slice(2, 4).toUpperCase()}
+                </button>
+              </div>
             ) : (
               // Всегда показываем ConnectButton когда не подключён — без моргания
               <ConnectButton
