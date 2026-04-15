@@ -154,13 +154,11 @@ export default function DashboardPage() {
     address: factoryAddress ?? INK_FACTORY_ADDRESS,
     abi: INK_FACTORY_ABI,
     functionName: 'getDeployedTokens',
-    query: { staleTime: 120_000, enabled: !!factoryAddress }
+    query: { staleTime: 300_000, enabled: !!factoryAddress }
   });
 
   const [myTokenAddresses, setMyTokenAddresses] = useState<string[]>([]);
   const [isLoadingOwned, setIsLoadingOwned] = useState(false);
-  const cacheRef = useRef<{ key: string; tokens: string[] } | null>(null);
-  const appliedKeyRef = useRef<string | null>(null);
 
   const tokenList = useMemo(() => {
     const raw = (allTokens as string[] | undefined) || [];
@@ -186,7 +184,7 @@ export default function DashboardPage() {
   const { data: batchData } = useReadContracts({
     contracts: batchContracts,
     multicallAddress: '0xcA11bde05977b3631167028862bE2a173976CA11',
-    query: { staleTime: 60_000, gcTime: 300_000, enabled: tokenList.length > 0 && !!address },
+    query: { staleTime: 180_000, gcTime: 300_000, enabled: tokenList.length > 0 && !!address },
   });
 
   const tokenDataMap = useMemo((): Record<string, TokenData> => {
@@ -228,14 +226,14 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!address || !publicClientRef.current) return;
-    const cacheKey = `${address}-${chainId}`;
-    if (cacheRef.current?.key === cacheKey) {
-      if (appliedKeyRef.current !== cacheKey) {
-        appliedKeyRef.current = cacheKey;
-        setMyTokenAddresses(cacheRef.current.tokens);
+    const cacheKey = `inklaunch-owned-${address}-${chainId}`;
+    try {
+      const stored = sessionStorage.getItem(cacheKey);
+      if (stored) {
+        setMyTokenAddresses(JSON.parse(stored));
+        return;
       }
-      return;
-    }
+    } catch {}
     let cancelled = false;
 
     const logAddress = getFactoryAddress(chainId) ?? INK_FACTORY_ADDRESS;
@@ -264,6 +262,7 @@ export default function DashboardPage() {
         });
         allLogs.push(...chunk);
         from = to + BigInt(1);
+        if (from <= latest) await new Promise(r => setTimeout(r, 150));
       }
       return allLogs;
     };
@@ -274,8 +273,7 @@ export default function DashboardPage() {
       const mine = logs
         .filter(l => l.args.owner?.toLowerCase() === address.toLowerCase())
         .map(l => l.args.tokenAddress as string);
-      cacheRef.current = { key: `${address}-${chainId}`, tokens: mine };
-      appliedKeyRef.current = `${address}-${chainId}`;
+      try { sessionStorage.setItem(cacheKey, JSON.stringify(mine)); } catch {}
       setMyTokenAddresses(mine);
     })
     .catch(err => {

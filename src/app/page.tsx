@@ -30,7 +30,7 @@ export default function LandingPage() {
     abi: INK_FACTORY_ABI,
     functionName: 'getDeployedTokens',
     chainId: 763373,
-    query: { staleTime: 30_000 },
+    query: { staleTime: 300_000 },
   });
 
   const { data: baseTokens } = useReadContract({
@@ -38,7 +38,7 @@ export default function LandingPage() {
     abi: INK_FACTORY_ABI,
     functionName: 'getDeployedTokens',
     chainId: 84532,
-    query: { staleTime: 30_000 },
+    query: { staleTime: 300_000 },
   });
 
   const inkCount = inkTokens ? (inkTokens as string[]).length : 0;
