@@ -141,7 +141,7 @@ export default function DashboardPage() {
   const [search, setSearch] = useState('');
   const [sortMode, setSortMode] = useState<SortMode>('newest');
 
-  const { address, isConnected, isReconnecting, status } = useAccount();
+  const { address, isConnected, isReconnecting } = useAccount();
   const chainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
   const { balanceFormatted } = useGlobalBalance();
@@ -160,6 +160,7 @@ export default function DashboardPage() {
   const [myTokenAddresses, setMyTokenAddresses] = useState<string[]>([]);
   const [isLoadingOwned, setIsLoadingOwned] = useState(false);
   const cacheRef = useRef<{ key: string; tokens: string[] } | null>(null);
+  const appliedKeyRef = useRef<string | null>(null);
 
   const tokenList = useMemo(() => {
     const raw = (allTokens as string[] | undefined) || [];
@@ -222,12 +223,17 @@ export default function DashboardPage() {
   }, [tokenList, sortMode, tokenDataMap]);
 
   const publicClient = usePublicClient();
+  const publicClientRef = useRef(publicClient);
+  publicClientRef.current = publicClient;
 
   useEffect(() => {
-    if (!address || !publicClient) return;
+    if (!address || !publicClientRef.current) return;
     const cacheKey = `${address}-${chainId}`;
     if (cacheRef.current?.key === cacheKey) {
-      setMyTokenAddresses(cacheRef.current.tokens);
+      if (appliedKeyRef.current !== cacheKey) {
+        appliedKeyRef.current = cacheKey;
+        setMyTokenAddresses(cacheRef.current.tokens);
+      }
       return;
     }
     let cancelled = false;
@@ -236,9 +242,10 @@ export default function DashboardPage() {
     setIsLoadingOwned(true);
 
     const fetchPaginatedLogs = async () => {
+      const client = publicClientRef.current!;
       // Base Sepolia RPC caps getLogs at 10,000 blocks per request
       const CHUNK = chainId === 84532 ? BigInt(9999) : BigInt(99000);
-      const latest = await publicClient.getBlockNumber();
+      const latest = await client.getBlockNumber();
       const startBlock = chainId === 763373
         ? BigInt(46850539)   // Ink Sepolia factory deployment block
         : BigInt(39200000);  // Base Sepolia factory deployment block (~Apr 2025)
@@ -249,7 +256,7 @@ export default function DashboardPage() {
       while (from <= latest) {
         if (cancelled) return allLogs;
         const to = from + CHUNK > latest ? latest : from + CHUNK;
-        const chunk = await publicClient.getLogs({
+        const chunk = await client.getLogs({
           address: logAddress,
           event: parseAbiItem('event TokenCreated(address indexed tokenAddress, string name, string symbol, uint256 initialSupply, address owner)'),
           fromBlock: from,
@@ -268,6 +275,7 @@ export default function DashboardPage() {
         .filter(l => l.args.owner?.toLowerCase() === address.toLowerCase())
         .map(l => l.args.tokenAddress as string);
       cacheRef.current = { key: `${address}-${chainId}`, tokens: mine };
+      appliedKeyRef.current = `${address}-${chainId}`;
       setMyTokenAddresses(mine);
     })
     .catch(err => {
@@ -279,7 +287,7 @@ export default function DashboardPage() {
     });
 
     return () => { cancelled = true; };
-  }, [address, publicClient, chainId]);
+  }, [address, chainId]);
 
   if (isReconnecting) return null;
 
