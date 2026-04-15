@@ -94,7 +94,7 @@ export default function OGImage() {
           position: 'absolute', bottom: '32px',
           fontSize: '16px', color: 'rgba(255,255,255,0.25)', letterSpacing: '1px',
         }}>
-          inklaunch.vercel.app
+          ink-theta.vercel.app
         </div>
       </div>
     ),

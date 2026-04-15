@@ -210,7 +210,7 @@ export default function LaunchPage() {
 
              <div className="flex flex-col sm:flex-row gap-3 w-full">
                <a
-                 href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`🚀 Just deployed $${symbol} (${name}) on ${chainId === 84532 ? 'Base' : 'Ink'} via InkLaunch!\n\nhttps://inklaunch.vercel.app`)}`}
+                 href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`🚀 Just deployed $${symbol} (${name}) on ${chainId === 84532 ? 'Base' : 'Ink'} via InkLaunch!\n\nhttps://ink-theta.vercel.app`)}`}
                  target="_blank" rel="noopener noreferrer"
                  className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-[#1d9bf0]/20 text-white/60 hover:text-[#1d9bf0] font-bold text-sm border border-white/10 hover:border-[#1d9bf0]/30 transition-all flex items-center justify-center gap-2"
                >

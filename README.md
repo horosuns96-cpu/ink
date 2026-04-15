@@ -15,7 +15,7 @@
 > Connect your wallet → configure your token → deploy in seconds.  
 > No Solidity knowledge required.
 
-[**🌐 Live App**](https://inklaunch.vercel.app) · [**Ink Explorer**](https://explorer-sepolia.inkonchain.com) · [**Base Explorer**](https://sepolia.basescan.org) · [**Get Testnet ETH**](https://inkonchain.com/faucet)
+[**🌐 Live App**](https://ink-theta.vercel.app) · [**Ink Explorer**](https://explorer-sepolia.inkonchain.com) · [**Base Explorer**](https://sepolia.basescan.org) · [**Get Testnet ETH**](https://inkonchain.com/faucet)
 
 </div>
 
