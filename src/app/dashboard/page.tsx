@@ -159,7 +159,7 @@ export default function DashboardPage() {
 
   const [myTokenAddresses, setMyTokenAddresses] = useState<string[]>([]);
   const [isLoadingOwned, setIsLoadingOwned] = useState(false);
-  const cacheRef = useRef<{ address: string; tokens: string[] } | null>(null);
+  const cacheRef = useRef<{ key: string; tokens: string[] } | null>(null);
 
   const tokenList = useMemo(() => {
     const raw = (allTokens as string[] | undefined) || [];
@@ -225,7 +225,8 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!address || !publicClient) return;
-    if (cacheRef.current?.address === address) {
+    const cacheKey = `${address}-${chainId}`;
+    if (cacheRef.current?.key === cacheKey) {
       setMyTokenAddresses(cacheRef.current.tokens);
       return;
     }
@@ -244,7 +245,7 @@ export default function DashboardPage() {
       const mine = logs
         .filter(l => l.args.owner?.toLowerCase() === address.toLowerCase())
         .map(l => l.args.tokenAddress as string);
-      cacheRef.current = { address, tokens: mine };
+      cacheRef.current = { key: `${address}-${chainId}`, tokens: mine };
       setMyTokenAddresses(mine);
     })
     .catch(err => {

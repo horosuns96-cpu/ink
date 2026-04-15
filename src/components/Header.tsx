@@ -68,7 +68,7 @@ function ProfileDropdown({ address, onClose }: { address: string; onClose: () =>
         <p className="text-[10px] text-purple-400/80 uppercase tracking-widest font-black mb-1">Network</p>
         <div className="grid grid-cols-2 gap-2">
           <button
-            onClick={() => switchChainAsync({ chainId: 763373 })}
+            onClick={async () => { try { await switchChainAsync({ chainId: 763373 }); } catch { toast.error('Switch network manually in your wallet app.'); } }}
             className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
               chainId === 763373
                 ? 'bg-purple-600/40 border border-purple-500/60 text-purple-300'
@@ -79,7 +79,7 @@ function ProfileDropdown({ address, onClose }: { address: string; onClose: () =>
             Ink
           </button>
           <button
-            onClick={() => switchChainAsync({ chainId: 84532 })}
+            onClick={async () => { try { await switchChainAsync({ chainId: 84532 }); } catch { toast.error('Switch network manually in your wallet app.'); } }}
             className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
               chainId === 84532
                 ? 'bg-blue-600/40 border border-blue-500/60 text-blue-300'

@@ -7,7 +7,7 @@ import {
   walletConnectWallet,
   rainbowWallet,
   injectedWallet,
-  trustWallet,
+  metaMaskWallet,
   safeWallet,
 } from '@rainbow-me/rainbowkit/wallets';
 import { WagmiProvider, useAccount, useDisconnect } from 'wagmi';
@@ -44,7 +44,7 @@ export const config = getDefaultConfig({
   projectId: 'e6e6a80c62bfd3d095c47aaa8b2e439e',
   chains: [inkSepolia, baseSepolia],
   ssr: false,
-  multiInjectedProviderDiscovery: false,
+  multiInjectedProviderDiscovery: true,
   appDescription: 'InkLaunch is a multichain no-code ERC-20 token factory. Supports Ink Sepolia and Base Sepolia.',
   appUrl: getAppUrl(),
   appIcon: 'https://inkonchain.com/favicon.ico',
@@ -52,7 +52,7 @@ export const config = getDefaultConfig({
     {
       groupName: 'Popular',
       // injectedWallet auto-detects MetaMask, Rabby, Brave Wallet and any other injected provider
-      wallets: [injectedWallet, coinbaseWallet, rainbowWallet, trustWallet],
+      wallets: [metaMaskWallet, injectedWallet, coinbaseWallet, rainbowWallet],
     },
     {
       groupName: 'Other',
@@ -83,18 +83,24 @@ function SessionManager() {
   const { disconnect } = useDisconnect();
   const queryClient = useQueryClient();
 
-  // 0. Native Wagmi Listener for Instant UI Sync on WalletConnect Confirm
+  // 0a. watchAccount — fires on WalletConnect mobile confirm
   useEffect(() => {
     const unwatch = watchAccount(config, {
       onChange(data) {
         if (data.status === 'connected') {
-          console.log('[SessionManager] watchAccount triggered. Invalidating cache.');
-          queryClient.invalidateQueries({ refetchType: 'active' });
+          queryClient.invalidateQueries();
         }
       }
     });
     return () => unwatch();
   }, [queryClient]);
+
+  // 0b. status watcher — belt-and-suspenders for WC sync
+  useEffect(() => {
+    if (status === 'connected') {
+      queryClient.invalidateQueries();
+    }
+  }, [status, queryClient]);
 
   // 1. Storage cleanup on explicit disconnect
   useEffect(() => {

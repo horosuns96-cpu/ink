@@ -171,7 +171,7 @@ export default function LaunchPage() {
                  <div className="grid grid-cols-2 gap-4">
                    <div>
                      <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest block mb-2">Ticker Symbol</label>
-                     <input type="text" value={symbol} onChange={e => setSymbol(e.target.value.toUpperCase())} required minLength={2} maxLength={6} style={{ textTransform: 'uppercase'}} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all font-mono" placeholder="INK" />
+                     <input type="text" value={symbol} onChange={e => setSymbol(e.target.value.replace(/[^A-Za-z]/g, '').toUpperCase())} required minLength={2} maxLength={6} pattern="[A-Z]{2,6}" style={{ textTransform: 'uppercase'}} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all font-mono" placeholder="INK" />
                    </div>
                    <div>
                      <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest block mb-2">Initial Supply</label>
