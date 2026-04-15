@@ -194,7 +194,7 @@ export default function DashboardPage() {
         });
         allLogs.push(...chunk);
         from = to + BigInt(1);
-        if (from <= latest) await new Promise(r => setTimeout(r, 150));
+        if (from <= latest) await new Promise(r => setTimeout(r, 400));
       }
 
       const mine = allLogs

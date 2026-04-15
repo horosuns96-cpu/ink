@@ -37,7 +37,7 @@ function PreviewCard({ name, symbol, supply, chainId }: { name: string; symbol: 
            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 to-cyan-500 mb-4 flex items-center justify-center shadow-inner shadow-black/80 text-white font-black text-xl border border-white/20">
              {symbol.slice(0,2) || '??'}
            </div>
-           <h3 className="text-2xl font-bold tracking-tight text-white">{name || 'Your Token'}</h3>
+           <h3 className="text-lg font-bold tracking-tight text-white text-center w-full truncate px-1" title={name || 'Your Token'}>{name || 'Your Token'}</h3>
            <p className="text-white/40 text-sm font-mono mt-1">Asset ID</p>
          </div>
 
@@ -206,7 +206,7 @@ export default function LaunchPage() {
                <form onSubmit={handleDeploy} className="space-y-6">
                  <div>
                    <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest block mb-2">Full Asset Name</label>
-                   <input id="token-name" name="token-name" type="text" value={name} onChange={e => setName(e.target.value.slice(0, 50))} required minLength={2} maxLength={50} autoComplete="off" className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all" placeholder="e.g. Ink Protocol" />
+                   <input id="token-name" name="token-name" type="text" value={name} onChange={e => setName(e.target.value.slice(0, 32))} required minLength={2} maxLength={32} autoComplete="off" className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all" placeholder="e.g. Ink Protocol" />
                  </div>
                  <div className="grid grid-cols-2 gap-4">
                    <div>

@@ -47,6 +47,7 @@ export const config = getDefaultConfig({
   projectId: 'e6e6a80c62bfd3d095c47aaa8b2e439e',
   chains: [inkSepolia, baseSepolia],
   ssr: false,
+  pollingInterval: 15_000,
   multiInjectedProviderDiscovery: true,
   appDescription: 'InkLaunch is a multichain no-code ERC-20 token factory. Supports Ink Sepolia and Base Sepolia.',
   appUrl: getAppUrl(),
