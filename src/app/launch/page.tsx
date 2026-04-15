@@ -179,11 +179,11 @@ export default function LaunchPage() {
                </a>
                {deployedTokenAddress && (
                  <a
-                   href={`https://app.uniswap.org/#/add/ETH/${deployedTokenAddress}`}
+                   href={`${explorerUrl}/token/${deployedTokenAddress}`}
                    target="_blank" rel="noopener noreferrer"
-                   className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-pink-500/20 text-white/60 hover:text-pink-400 font-bold text-sm border border-white/10 hover:border-pink-500/30 transition-all flex items-center justify-center gap-2"
+                   className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-purple-500/20 text-white/60 hover:text-purple-400 font-bold text-sm border border-white/10 hover:border-purple-500/30 transition-all flex items-center justify-center gap-2"
                  >
-                   Add Liquidity <ExternalLink className="w-3.5 h-3.5" />
+                   Token Explorer <ExternalLink className="w-3.5 h-3.5" />
                  </a>
                )}
              </div>
