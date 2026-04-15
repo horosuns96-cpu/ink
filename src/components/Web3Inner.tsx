@@ -85,10 +85,20 @@ function SessionManager() {
 
   // 0a. watchAccount — fires on WalletConnect mobile confirm
   useEffect(() => {
+    let prevAddress: string | undefined;
+    let prevChainId: number | undefined;
     const unwatch = watchAccount(config, {
       onChange(data) {
-        if (data.status === 'connected') {
-          queryClient.invalidateQueries();
+        if (
+          data.status === 'connected' &&
+          (data.address !== prevAddress || data.chainId !== prevChainId)
+        ) {
+          prevAddress = data.address;
+          prevChainId = data.chainId;
+          // Only invalidate contract/balance data, never the logs cache
+          queryClient.invalidateQueries({
+            predicate: q => q.queryKey[0] !== 'owned-tokens',
+          });
         }
       }
     });
@@ -98,7 +108,9 @@ function SessionManager() {
   // 0b. status watcher — belt-and-suspenders for WC sync
   useEffect(() => {
     if (status === 'connected') {
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries({
+        predicate: q => q.queryKey[0] !== 'owned-tokens',
+      });
     }
   }, [status, queryClient]);
 

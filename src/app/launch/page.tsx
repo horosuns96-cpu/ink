@@ -206,7 +206,7 @@ export default function LaunchPage() {
                <form onSubmit={handleDeploy} className="space-y-6">
                  <div>
                    <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest block mb-2">Full Asset Name</label>
-                   <input id="token-name" name="token-name" type="text" value={name} onChange={e => setName(e.target.value)} required minLength={2} maxLength={50} autoComplete="off" className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all" placeholder="e.g. Ink Protocol" />
+                   <input id="token-name" name="token-name" type="text" value={name} onChange={e => setName(e.target.value.slice(0, 50))} required minLength={2} maxLength={50} autoComplete="off" className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all" placeholder="e.g. Ink Protocol" />
                  </div>
                  <div className="grid grid-cols-2 gap-4">
                    <div>
